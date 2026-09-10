@@ -3,8 +3,14 @@
 <head>
 <meta charset="utf-8">
 <title>flap frame</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500&display=swap">
 <style>
+  /* Schrift lokal aus dem Projekt, nicht ueber das Netz: sonst kann ein Frame
+     gerendert werden, bevor die Webschrift da ist, und faellt auf Arial zurueck. */
+  @font-face {
+    font-family: 'Chakra Petch';
+    src: url('../../assets/480x480-amazfit-t-rex-3-pro/fonts/ChakraPetch-Medium.ttf') format('truetype');
+    font-weight: 500;
+  }
   html, body { margin: 0; background: #000; overflow: hidden; }
   #cell { position: relative; overflow: hidden; background: #000; }
   #strip { position: absolute; left: 0; top: 0; text-align: center; font-family: 'Chakra Petch', 'Arial Narrow', sans-serif; }

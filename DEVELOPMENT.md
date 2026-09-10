@@ -169,11 +169,31 @@ Ganz oben in `watchface/index.js`:
 
 ```js
 const USE_RAIN = true    // Matrix-Regen als Vollbild-Animation
-const USE_FLAP = true    // Klapp-Ziffern statt einfacher Textziffern
+const USE_FLAP = false   // Klapp-Ziffern statt einfacher Textziffern
 ```
 
 Beide brauchen die Bildfolgen unten. Stehen sie auf `false`, läuft dasselbe
 Zifferblatt ohne Regen und mit hart wechselnden Textziffern.
+
+`USE_FLAP` steht bewusst auf `false`. Mit Textziffern läuft das Zifferblatt
+zuverlässig, der Klapp-Effekt ist der Teil, der noch auf echter Hardware
+bestätigt werden muss.
+
+> **Warum das so ist.** Eine `IMG_ANIM` zeichnet nur, solange sie läuft. Steht
+> sie, bleibt die Zelle leer, und im Log steht trotzdem überall `ok`. Deshalb
+> verschwand die Uhrzeit komplett, als der Klapp-Effekt zum ersten Mal aktiv
+> war. Sichtbar wurde das an einer Salve von `_pause`-Meldungen direkt nach
+> `[matrix] clock ok`: das System pausiert jede nicht laufende Animation.
+>
+> Behoben ist es, indem jede Ziffer aus **zwei** Widgets besteht: einem
+> `IMG`-Standbild aus `image/digit/<größe>/<ziffer>.png`, das dauerhaft steht,
+> und der `IMG_ANIM` darüber, die nur während des Rollens eingeblendet wird.
+> `playStep` setzt am Ende der Kette das Standbild auf den Zielwert und
+> versteckt die Animation wieder.
+>
+> Zum Testen `USE_FLAP` auf `true` setzen. Dafür müssen alle 140 Frames liegen
+> (60 in `big`, 40 in `sec`, 40 in `sml`) und die 30 Standbilder unter
+> `image/digit/`. Fehlt etwas davon, bleibt die betroffene Ziffer leer.
 
 ## Frames
 

@@ -19,16 +19,20 @@ import { Time, Step, HeartRate, Battery } from '@zos/sensor'
 // Both need rendered frames under assets/, see DEVELOPMENT.md. Until then the
 // face runs on plain text widgets, which need no assets at all.
 const USE_RAIN = true
-const USE_FLAP = true
+const USE_FLAP = false
 
 // One "roll" animation per digit is the step from n to n+1. A change of 9 -> 2
 // plays 9->0, 0->1, 1->2 back to back, so the digit flaps through every value.
 // Every cell size needs its own frames - an IMG_ANIM has exactly one pixel
 // size - and the small ones get by with fewer steps.
+// Jede Ziffer besteht aus zwei Widgets: einem Standbild, das dauerhaft steht,
+// und einer IMG_ANIM darueber, die nur waehrend des Rollens sichtbar ist. Eine
+// IMG_ANIM zeichnet naemlich nur, solange sie laeuft - steht sie, bleibt die
+// Zelle leer.
 const FLAP = {
-  big: { path: 'image/flap/big', frames: 6 },
-  sec: { path: 'image/flap/sec', frames: 4 },
-  sml: { path: 'image/flap/sml', frames: 4 }
+  big: { path: 'image/flap/big', still: 'image/digit/big', frames: 6 },
+  sec: { path: 'image/flap/sec', still: 'image/digit/sec', frames: 4 },
+  sml: { path: 'image/flap/sml', still: 'image/digit/sml', frames: 4 }
 }
 // 20 fps: one digit step takes 300 ms with six frames, so the roll is visible
 // instead of flicking past.
@@ -140,9 +144,18 @@ function slotGroup(name, count, x, y, box, color, flap) {
   for (let i = 0; i < count; i++) {
     const left = x + i * box.w
     let widget
+    let anim = null
+    let still = null
 
     if (USE_FLAP) {
-      widget = ui.createWidget(ui.widget.IMG_ANIM, {
+      still = {
+        x: left,
+        y: y,
+        src: flap.still + '/0.png',
+        show_level: ui.show_level.ONLY_NORMAL
+      }
+      widget = ui.createWidget(ui.widget.IMG, still)
+      anim = ui.createWidget(ui.widget.IMG_ANIM, {
         x: left,
         y: y,
         anim_path: flap.path,
@@ -154,6 +167,7 @@ function slotGroup(name, count, x, y, box, color, flap) {
         anim_status: ui.anim_status.STOP,
         show_level: ui.show_level.ONLY_NORMAL
       })
+      anim.setProperty(ui.prop.VISIBLE, false)
     } else {
       widget = ui.createWidget(ui.widget.TEXT, {
         x: left,
@@ -170,7 +184,16 @@ function slotGroup(name, count, x, y, box, color, flap) {
       })
     }
 
-    group.push({ widget: widget, value: 0, shown: true, queue: [], flap: flap })
+    group.push({
+      widget: widget,
+      anim: anim,
+      still: still,
+      value: 0,
+      shown: true,
+      painted: false,
+      queue: [],
+      flap: flap
+    })
   }
 
   digits[name] = group
@@ -185,13 +208,22 @@ function setDigits(name, text) {
     if (!(digit >= 0 && digit <= 9)) continue
 
     const slot = group[i]
-    if (slot.value === digit) continue
 
     if (USE_FLAP) {
+      // Beim ersten Zeichnen nur das Standbild setzen, nicht rollen.
+      if (!slot.painted) {
+        slot.value = digit
+        slot.painted = true
+        setStill(slot)
+        continue
+      }
+      if (slot.value === digit) continue
       rollTo(slot, digit)
     } else {
+      if (slot.value === digit && slot.painted) continue
       slot.widget.setProperty(ui.prop.MORE, { text: String(digit) })
       slot.value = digit
+      slot.painted = true
     }
   }
 }
@@ -211,6 +243,7 @@ function setNumber(name, value) {
     const used = i < text.length
     if (slot.shown === used) continue
     slot.widget.setProperty(ui.prop.VISIBLE, used)
+    if (slot.anim && !used) slot.anim.setProperty(ui.prop.VISIBLE, false)
     slot.shown = used
   }
 
@@ -224,6 +257,12 @@ function setNumber(name, value) {
   }
 }
 
+// Standbild auf den aktuellen Wert setzen.
+function setStill(slot) {
+  slot.still.src = slot.flap.still + '/' + slot.value + '.png'
+  slot.widget.setProperty(ui.prop.MORE, slot.still)
+}
+
 // Queue one step per digit in between, so the roll always runs forwards.
 function rollTo(slot, target) {
   slot.queue = []
@@ -232,15 +271,23 @@ function rollTo(slot, target) {
     slot.queue.push(from)
     from = (from + 1) % 10
   }
+  slot.anim.setProperty(ui.prop.VISIBLE, true)
+  slot.widget.setProperty(ui.prop.VISIBLE, false)
   playStep(slot)
 }
 
 function playStep(slot) {
   const from = slot.queue.shift()
-  if (from === undefined) return
+  if (from === undefined) {
+    // Fertig gerollt: Standbild auf den Zielwert, Animation wieder verstecken.
+    setStill(slot)
+    slot.widget.setProperty(ui.prop.VISIBLE, true)
+    slot.anim.setProperty(ui.prop.VISIBLE, false)
+    return
+  }
 
   slot.value = (from + 1) % 10
-  slot.widget.setProperty(ui.prop.MORE, {
+  slot.anim.setProperty(ui.prop.MORE, {
     anim_path: slot.flap.path,
     anim_prefix: 'roll_' + from,
     anim_ext: 'png',
