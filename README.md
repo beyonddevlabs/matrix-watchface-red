@@ -89,9 +89,9 @@ danebenliegt und mitgeliefert werden muss.
 
 ## Stand
 
-Läuft. Der Matrix-Regen ist drin, 24 Frames, 3 Sekunden pro Schleife, nahtlos.
-Was noch fehlt, sind die Bildfolgen für die Klapp-Ziffern. Bis dahin wechseln
-die Ziffern hart statt zu klappen, alles andere funktioniert.
+Läuft, alles drin. Der Matrix-Regen hat 24 Frames und 3 Sekunden pro Schleife,
+nahtlos. Die Klapp-Ziffern haben eigene Bildfolgen für jede der drei
+Zellengrößen, ein Ziffernschritt dauert 300 Millisekunden.
 
 Es gibt das Ganze auch in Grün, siehe `matrix-watchface`.
 

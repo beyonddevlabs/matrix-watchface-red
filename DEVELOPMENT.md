@@ -169,10 +169,11 @@ Ganz oben in `watchface/index.js`:
 
 ```js
 const USE_RAIN = true    // Matrix-Regen als Vollbild-Animation
-const USE_FLAP = false   // Klapp-Ziffern statt einfacher Textziffern
+const USE_FLAP = true    // Klapp-Ziffern statt einfacher Textziffern
 ```
 
-`USE_FLAP` braucht noch Frames; ohne sie wechseln die Ziffern hart.
+Beide brauchen die Bildfolgen unten. Stehen sie auf `false`, läuft dasselbe
+Zifferblatt ohne Regen und mit hart wechselnden Textziffern.
 
 ## Frames
 
@@ -181,11 +182,34 @@ Alles unter `assets/480x480-amazfit-t-rex-3-pro/`:
 | Ordner | Dateien | Größe | Stand |
 | --- | --- | --- | --- |
 | `rain/` | `rain_0.png` … `rain_23.png` | 480 × 480 | **fertig, 2,4 MB** |
-| `flap/big/` | `roll_<n>_<f>.png`, n = 0…9, f = 0…5 | 44 × 76 | fehlt |
-| `flap/small/` | `roll_<n>_<f>.png`, n = 0…9, f = 0…5 | 16 × 30 | fehlt |
+| `flap/big/` | `roll_<n>_<f>.png`, n = 0…9, f = 0…5 | 51 × 76 | **fertig** |
+| `flap/sec/` | `roll_<n>_<f>.png`, n = 0…9, f = 0…3 | 18 × 30 | **fertig** |
+| `flap/sml/` | `roll_<n>_<f>.png`, n = 0…9, f = 0…3 | 14 × 26 | **fertig** |
 
 Der Dateiname ist `<anim_prefix>_<index>.png` — bestätigt am offiziellen
 Sample (`anim_prefix: 'a'` → `a_0.png`).
+
+### Klapp-Ziffern
+
+**Jede Zellengröße braucht eigene Frames.** Eine `IMG_ANIM` hat genau eine
+Pixelgröße, deshalb gibt es drei Sätze: `big` für Stunde und Minute, `sec` für
+die Sekunden, `sml` für Schritte, Puls und Akku. Früher zeigten Sekunden und
+Datenwerte auf denselben Ordner, was nicht funktionieren kann.
+
+Erzeugt aus `design/frames/flap.html`, ein Aufruf pro Frame:
+
+```bash
+msedge --headless=new --window-size=51,76   --screenshot=.../image/flap/big/roll_9_3.png   "file:///<pfad>/design/frames/flap.html?size=big&from=9&f=3&c=c9ffd9&g=0,255,65"
+```
+
+`size` wählt die Zellengröße, `from` die Ausgangsziffer, `f` das Einzelbild,
+`c` die Ziffernfarbe und `g` die Glühfarbe als RGB-Tripel. Die rote Variante
+benutzt dieselbe Seite mit anderen Farbwerten.
+
+Das Tempo steckt in `FLAP_FPS` (aktuell 20). Bei sechs Frames dauert ein
+Ziffernschritt damit 300 ms; ein Sprung von 9 auf 2 klappt dreimal
+hintereinander, also knapp eine Sekunde. Höher heißt schneller und irgendwann
+unsichtbar.
 
 ### Regen
 

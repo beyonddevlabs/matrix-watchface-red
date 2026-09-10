@@ -19,14 +19,20 @@ import { Time, Step, HeartRate, Battery } from '@zos/sensor'
 // Both need rendered frames under assets/, see DEVELOPMENT.md. Until then the
 // face runs on plain text widgets, which need no assets at all.
 const USE_RAIN = true
-const USE_FLAP = false
+const USE_FLAP = true
 
 // One "roll" animation per digit is the step from n to n+1. A change of 9 -> 2
 // plays 9->0, 0->1, 1->2 back to back, so the digit flaps through every value.
-const FLAP_FRAMES = 6
-const FLAP_FPS = 30
-const FLAP_BIG = 'image/flap/big'
-const FLAP_SMALL = 'image/flap/small'
+// Every cell size needs its own frames - an IMG_ANIM has exactly one pixel
+// size - and the small ones get by with fewer steps.
+const FLAP = {
+  big: { path: 'image/flap/big', frames: 6 },
+  sec: { path: 'image/flap/sec', frames: 4 },
+  sml: { path: 'image/flap/sml', frames: 4 }
+}
+// 20 fps: one digit step takes 300 ms with six frames, so the roll is visible
+// instead of flicking past.
+const FLAP_FPS = 20
 
 // Chakra Petch Medium, mitgeliefert unter assets/<target>/fonts/ (OFL).
 // Ziffernbreite gemessen: 50.9 px bei 80 px, 14.0 px bei 22 px - die
@@ -128,7 +134,7 @@ function setText(key, widget, text) {
 
 // Every digit on the face is a slot: a TEXT widget, or an IMG_ANIM that rolls
 // to its new value once the flap frames exist.
-function slotGroup(name, count, x, y, box, color, folder) {
+function slotGroup(name, count, x, y, box, color, flap) {
   const group = []
 
   for (let i = 0; i < count; i++) {
@@ -139,11 +145,11 @@ function slotGroup(name, count, x, y, box, color, folder) {
       widget = ui.createWidget(ui.widget.IMG_ANIM, {
         x: left,
         y: y,
-        anim_path: folder,
+        anim_path: flap.path,
         anim_prefix: 'roll_0',
         anim_ext: 'png',
         anim_fps: FLAP_FPS,
-        anim_size: FLAP_FRAMES,
+        anim_size: flap.frames,
         repeat_count: 1,
         anim_status: ui.anim_status.STOP,
         show_level: ui.show_level.ONLY_NORMAL
@@ -164,7 +170,7 @@ function slotGroup(name, count, x, y, box, color, folder) {
       })
     }
 
-    group.push({ widget: widget, value: 0, shown: true, queue: [], folder: folder })
+    group.push({ widget: widget, value: 0, shown: true, queue: [], flap: flap })
   }
 
   digits[name] = group
@@ -235,11 +241,11 @@ function playStep(slot) {
 
   slot.value = (from + 1) % 10
   slot.widget.setProperty(ui.prop.MORE, {
-    anim_path: slot.folder,
+    anim_path: slot.flap.path,
     anim_prefix: 'roll_' + from,
     anim_ext: 'png',
     anim_fps: FLAP_FPS,
-    anim_size: FLAP_FRAMES,
+    anim_size: slot.flap.frames,
     repeat_count: 1,
     anim_status: ui.anim_status.START,
     anim_complete_call: safe('flap', function () {
@@ -302,15 +308,15 @@ function buildActive() {
     align: ui.align.CENTER_H, text: '> SYS.TIME', level: normal
   })
 
-  slotGroup('hour', 2, TIME_X, BIG.y, BIG, COLOR.digit, FLAP_BIG)
+  slotGroup('hour', 2, TIME_X, BIG.y, BIG, COLOR.digit, FLAP.big)
 
   text({
     x: TIME_X + 2 * BIG.w, y: BIG.y, w: COLON_W, h: BIG.h, size: BIG.size,
     color: COLOR.digit, align: ui.align.CENTER_H, text: ':', level: normal
   })
 
-  slotGroup('minute', 2, TIME_X + 2 * BIG.w + COLON_W, BIG.y, BIG, COLOR.digit, FLAP_BIG)
-  slotGroup('second', 2, SEC_X, SEC.y, SEC, COLOR.second, FLAP_SMALL)
+  slotGroup('minute', 2, TIME_X + 2 * BIG.w + COLON_W, BIG.y, BIG, COLOR.digit, FLAP.big)
+  slotGroup('second', 2, SEC_X, SEC.y, SEC, COLOR.second, FLAP.sec)
 
   widgets.cursor = ui.createWidget(ui.widget.FILL_RECT, {
     x: CURSOR.x,
@@ -336,9 +342,9 @@ function buildActive() {
   buildRow(3, 'PWR')
 
   widgets.date = text({ x: ROW.valueX, y: rowY(0), w: 160, color: COLOR.value, level: normal })
-  slotGroup('steps', 5, ROW.valueX, rowY(1), SMALL, COLOR.value, FLAP_SMALL)
-  slotGroup('heart', 3, ROW.valueX, rowY(2), SMALL, COLOR.value, FLAP_SMALL)
-  slotGroup('power', 3, ROW.valueX, rowY(3), SMALL, COLOR.value, FLAP_SMALL)
+  slotGroup('steps', 5, ROW.valueX, rowY(1), SMALL, COLOR.value, FLAP.sml)
+  slotGroup('heart', 3, ROW.valueX, rowY(2), SMALL, COLOR.value, FLAP.sml)
+  slotGroup('power', 3, ROW.valueX, rowY(3), SMALL, COLOR.value, FLAP.sml)
 
   unitWidget('heart', 2, 'BPM', 8)
   unitWidget('power', 3, '%', 0)

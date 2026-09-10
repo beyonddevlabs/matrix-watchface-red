@@ -1,0 +1,57 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>flap frame</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500&display=swap">
+<style>
+  html, body { margin: 0; background: #000; overflow: hidden; }
+  #cell { position: relative; overflow: hidden; background: #000; }
+  #strip { position: absolute; left: 0; top: 0; text-align: center; font-family: 'Chakra Petch', 'Arial Narrow', sans-serif; }
+  #strip div { display: block; }
+  #seam { position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: rgba(0, 0, 0, 0.55); }
+</style>
+</head>
+<body>
+<div id="cell"><div id="strip"></div><div id="seam"></div></div>
+<script>
+// Ein Einzelbild der Klappbewegung von Ziffer `from` auf `from + 1`.
+// f = 0 zeigt die Ausgangsziffer, f = frames - 1 die fertige Zielziffer.
+function q(name, fallback) {
+  var m = location.search.match(new RegExp('[?&]' + name + '=([^&]*)'));
+  return m ? decodeURIComponent(m[1]) : fallback;
+}
+
+var SIZES = {
+  big: { w: 51, h: 76, size: 80, frames: 6 },
+  sec: { w: 18, h: 30, size: 28, frames: 4 },
+  sml: { w: 14, h: 26, size: 22, frames: 4 }
+};
+
+var size = SIZES[q('size', 'big')];
+var from = parseInt(q('from', '0'), 10);
+var frame = parseInt(q('f', '0'), 10);
+var color = '#' + q('c', 'c9ffd9');
+var glow = q('g', '0,255,65');
+
+document.body.style.width = size.w + 'px';
+document.body.style.height = size.h + 'px';
+
+var cell = document.getElementById('cell');
+cell.style.width = size.w + 'px';
+cell.style.height = size.h + 'px';
+
+var strip = document.getElementById('strip');
+strip.style.width = size.w + 'px';
+strip.style.fontSize = size.size + 'px';
+strip.style.color = color;
+strip.style.textShadow = '0 0 6px rgba(' + glow + ',0.75), 0 0 20px rgba(' + glow + ',0.5)';
+strip.innerHTML =
+  '<div style="height:' + size.h + 'px;line-height:' + size.h + 'px">' + (from % 10) + '</div>' +
+  '<div style="height:' + size.h + 'px;line-height:' + size.h + 'px">' + ((from + 1) % 10) + '</div>';
+
+var progress = size.frames > 1 ? frame / (size.frames - 1) : 1;
+strip.style.transform = 'translateY(' + (-progress * size.h) + 'px)';
+</script>
+</body>
+</html>
