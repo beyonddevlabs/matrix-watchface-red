@@ -75,9 +75,13 @@ document.getElementById('rain').innerHTML = html;
 var strip = '';
 for (var q = 0; q < 20; q++) strip += (q % 10) + (q < 19 ? '\n' : '');
 
+// Die Klappkante gehoert zum Klapp-Effekt und wird nur mit ?flap gezeigt.
+var flap = location.search.indexOf('flap') >= 0;
+
 function cell(cls, stripCls, d, h, offset) {
   return '<div class="' + cls + '"><div class="' + stripCls + '" style="transform:translateY('
-    + (-(d * h) - (offset || 0)) + 'px)">' + strip + '</div><div class="seam"></div></div>';
+    + (-(d * h) - (offset || 0)) + 'px)">' + strip + '</div>'
+    + (flap ? '<div class="seam"></div>' : '') + '</div>';
 }
 
 // 10:09:36 - the sample time the Zepp OS preview spec asks for. With ?flap the
@@ -107,11 +111,17 @@ function num(value, pad) {
   for (var i = 0; i < s.length; i++) out += cell('cellsm', 'stripsm', +s.charAt(i), 26);
   return '<span class="num">' + out + (pad || '') + '</span>';
 }
+// ?preview=1 schaltet auf die Werte, die die Zepp-OS-Spezifikation fuer das
+// Store-Vorschaubild vorschreibt: Akku 75 %, Datum im Februar oder August.
+var storePreview = location.search.indexOf('preview') >= 0;
+var dateText = storePreview ? 'WED 12 AUG' : 'THU 10 SEP';
+var power = storePreview ? 75 : 87;
+
 document.getElementById('grid').innerHTML =
-  '<span class="lbl">DATE</span><span>THU 10 SEP</span>'
+  '<span class="lbl">DATE</span><span>' + dateText + '</span>'
   + '<span class="lbl">STEPS</span>' + num(8670)
   + '<span class="lbl">HR</span>' + num(86, '<span style="padding-left:8px">BPM</span>')
-  + '<span class="lbl">PWR</span>' + num(87, '<span>%</span>');
+  + '<span class="lbl">PWR</span>' + num(power, '<span>%</span>');
 </script>
 </body>
 </html>

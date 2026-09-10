@@ -1,9 +1,8 @@
 # Matrix Watchface Red
 
 **Der Matrix-Code auf deinem Handgelenk, in Rot.** Rote Zeichen regnen über einen
-schwarzen Grund, in der Mitte steht die Uhrzeit als Terminal-Ausdruck. Jede
-Ziffer klappt beim Wechsel durch wie eine Fallblattanzeige: von 9 auf 2 rollt
-sie vorwärts über 0 und 1.
+schwarzen Grund, in der Mitte steht die Uhrzeit als Terminal-Ausdruck, darunter
+Datum, Schritte, Puls und Akkustand. Ein Cursor blinkt im Sekundentakt.
 
 Für die **Amazfit T-Rex 3 Pro 48mm**.
 
@@ -11,25 +10,37 @@ Für die **Amazfit T-Rex 3 Pro 48mm**.
 
 ## Was drin steckt
 
-* **Fallende Katakana** über die ganze Fläche, in Dichte und Tempo einstellbar
-* **Klapp-Ziffern**: Uhrzeit, Schritte, Puls und Akku rollen bei jeder Änderung
-  durch die Zwischenwerte
-* **Phosphor-CRT-Look** mit Scanlines, Nachleuchten und langsam durchlaufendem
-  Helligkeitsband
+* **Fallende Katakana** über die ganze Fläche, 24 Einzelbilder, vier Sekunden
+  pro Schleife, nahtlos geschlossen
+* **Phosphor-CRT-Look** mit Scanlines, Nachleuchten und einem langsam
+  durchlaufenden Helligkeitsband
 * **Kantige Terminal-Schrift** (Chakra Petch), abgeschnittene Ecken statt
   Rundungen
-* **Blinkender Cursor** im Sekundentakt hinter der Uhrzeit
-* **Datum, Schritte, Puls und Akkustand** als Terminal-Zeilen
-* **Sparsame Always-On-Anzeige**: schwarzer Grund, konturierte Ziffern, kein
-  Regen, keine Animation
-
-**Der Klapp-Effekt, festgehalten mitten im Rollen**
-
-![Ziffer im Klappvorgang](docs/screenshots/flap.png)
+* **Uhrzeit exakt in der Bildmitte**, Sekunden kleiner rechts daneben, dahinter
+  der blinkende Cursor
+* **Datum, Schritte, Puls und Akkustand** als Terminal-Zeilen, alle Werte
+  bündig untereinander
+* **Sparsame Always-On-Anzeige**: schwarzer Grund, gedimmte Ziffern an genau
+  derselben Stelle wie im aktiven Zustand, kein Regen, keine Animation
 
 **Die Always-On-Anzeige, nur Uhrzeit, Datum und Schritte**
 
 ![Always-On-Anzeige](docs/screenshots/aod.png)
+
+## Klapp-Ziffern, vorbereitet aber ausgeschaltet
+
+Gedacht ist der Ziffernwechsel als Fallblattanzeige: von 9 auf 2 rollt die
+Ziffer vorwärts über 0 und 1 durch. Der Effekt ist vollständig gebaut, die
+Bildfolgen liegen im Projekt, ein Ziffernschritt dauert 300 Millisekunden.
+
+**Aktuell ist er ausgeschaltet.** Im Alltag wechseln die Ziffern direkt. Der
+Effekt lief auf echter Hardware noch nicht sauber und wartet auf einen weiteren
+Anlauf. Wer ihn ausprobieren will, setzt in `watchface/index.js` die Zeile
+`const USE_FLAP = false` auf `true`.
+
+So sähe er aus, hier mitten im Rollen festgehalten:
+
+![Ziffer im Klappvorgang](docs/screenshots/flap.png)
 
 ## Auf die Uhr bringen
 
@@ -89,11 +100,11 @@ danebenliegt und mitgeliefert werden muss.
 
 ## Stand
 
-Läuft, alles drin. Der Matrix-Regen hat 24 Frames und 3 Sekunden pro Schleife,
-nahtlos. Die Klapp-Ziffern haben eigene Bildfolgen für jede der drei
-Zellengrößen, ein Ziffernschritt dauert 300 Millisekunden.
+Läuft. Der Regen ist drin, die Anzeige steht, die Always-On-Variante auch.
+
+Offen sind zwei Dinge: der Klapp-Effekt braucht noch einen Durchlauf auf echter
+Hardware, und für eine Veröffentlichung im Zepp-Store fehlt eine eigene `appId`
+aus der Entwicklerkonsole. Details dazu in
+[DEVELOPMENT.md](DEVELOPMENT.md).
 
 Es gibt das Ganze auch in Grün, siehe `matrix-watchface`.
-
-Wer mitbauen will: die technische Dokumentation steht in
-[DEVELOPMENT.md](DEVELOPMENT.md).

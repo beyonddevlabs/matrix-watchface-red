@@ -45,9 +45,10 @@ const FONT = 'fonts/ChakraPetch-Medium.ttf'
 
 const RAIN_FRAMES = 24
 // Tempo des Regens: Spalten wandern 1-3 Glyphenzeilen pro Frame, die
-// Bildrate bestimmt also alles. 8 fps = 3 s pro Schleife. Kleiner = langsamer
-// und nebenbei weniger Rechenlast.
-const RAIN_FPS = 8
+// Bildrate bestimmt also alles. 6 fps = 4 s pro Schleife. Das ist zugleich der
+// wirksamste Performance-Hebel: jedes Frame ist ein 480x480-PNG, das aus dem
+// Flash dekodiert wird. Weniger Bilder pro Sekunde heisst direkt weniger Last.
+const RAIN_FPS = 6
 
 // The design's accent green, pre-blended over black at the opacities used
 // there. Colours are plain numbers, the way @zos/ui takes them.
@@ -95,6 +96,11 @@ let battery = null
 
 let tickTimer = null
 let cursorOn = true
+
+// Schritte koennen im Gehen mehrmals pro Sekunde eintreffen. Die Rueckrufe
+// merken sich nur, dass etwas offen ist; geschrieben wird hoechstens einmal
+// pro Sekunde im Takt. Sonst zeichnet das System bei jedem Schritt neu.
+const pending = { steps: false, heart: false, power: false }
 
 // ---------------------------------------------------------------- helpers
 
@@ -460,15 +466,27 @@ function openSensors() {
 
 function wireSensors() {
   time.onPerMinute(safe('minute', updateMinute))
-  step.onChange(safe('steps', function () {
+  step.onChange(safe('steps', function () { pending.steps = true }))
+  heart.onLastChange(safe('heart', function () { pending.heart = true }))
+  battery.onChange(safe('battery', function () { pending.power = true }))
+}
+
+// Offene Sensorwerte nachziehen, gebuendelt. Laeuft nur, solange der Bildschirm
+// an ist - bei ausgeschaltetem Display waere das Zeichnen ohnehin unsichtbar,
+// und beim Aufwachen holt refreshAll alles nach.
+function flushPending() {
+  if (pending.steps) {
+    pending.steps = false
     setNumber('steps', step.getCurrent() || 0)
-  }))
-  heart.onLastChange(safe('heart', function () {
+  }
+  if (pending.heart) {
+    pending.heart = false
     setNumber('heart', heart.getLast() || 0)
-  }))
-  battery.onChange(safe('battery', function () {
+  }
+  if (pending.power) {
+    pending.power = false
     setNumber('power', battery.getCurrent() || 0)
-  }))
+  }
 }
 
 // ---------------------------------------------------------------- updates
@@ -478,21 +496,28 @@ function dateText() {
   return WEEKDAYS[time.getDay() - 1] + ' ' + pad(time.getDate()) + ' ' + MONTHS[time.getMonth() - 1]
 }
 
-// Everything that changes at most once a minute. Also drives the always-on
-// face, which the system wakes for this event while the timer is stopped.
+// Am Minutenwechsel so wenig wie moeglich schreiben: jeder setProperty-Aufruf
+// zwingt das System zum Neuzeichnen, und darunter laeuft der Vollbild-Regen.
+// Deshalb hier nur, was im sichtbaren Zifferblatt wirklich anders wird.
+// Der Akku hat einen eigenen onChange-Listener und gehoert nicht hierher.
 function updateMinute() {
-  const hours = pad(time.getHours())
-  const minutes = pad(time.getMinutes())
-  const steps = step.getCurrent() || 0
+  if (isAod()) {
+    updateAod()
+    return
+  }
 
-  setDigits('hour', hours)
-  setDigits('minute', minutes)
-  setNumber('power', battery.getCurrent() || 0)
-
+  setDigits('hour', pad(time.getHours()))
+  setDigits('minute', pad(time.getMinutes()))
   setText('date', widgets.date, dateText())
-  setText('aodTime', widgets.aodTime, hours + ':' + minutes)
+}
+
+// Die Always-On-Widgets sind im Normalbetrieb unsichtbar. Sie werden beim
+// Abschalten des Displays einmal nachgezogen und danach im Minutentakt, statt
+// jede Minute im laufenden Betrieb mitgeschrieben zu werden.
+function updateAod() {
+  setText('aodTime', widgets.aodTime, pad(time.getHours()) + ':' + pad(time.getMinutes()))
   setText('aodDate', widgets.aodDate, dateText())
-  setText('aodSteps', widgets.aodSteps, String(steps))
+  setText('aodSteps', widgets.aodSteps, String(step.getCurrent() || 0))
 }
 
 // The only thing that has to happen every second.
@@ -500,6 +525,7 @@ function tick() {
   setDigits('second', pad(time.getSeconds()))
   cursorOn = !cursorOn
   widgets.cursor.setProperty(ui.prop.VISIBLE, cursorOn)
+  flushPending()
 }
 
 function isAod() {
@@ -513,8 +539,13 @@ function isAod() {
 
 function refreshAll() {
   updateMinute()
+  updateAod()
+  pending.steps = false
+  pending.heart = false
+  pending.power = false
   setNumber('steps', step.getCurrent() || 0)
   setNumber('heart', heart.getLast() || 0)
+  setNumber('power', battery.getCurrent() || 0)
   setDigits('second', pad(time.getSeconds()))
 }
 
@@ -548,7 +579,10 @@ WatchFace({
     stage('delegate', function () {
       ui.createWidget(ui.widget.WIDGET_DELEGATE, {
         resume_call: safe('resume', startClock),
-        pause_call: safe('pause', stopClock)
+        pause_call: safe('pause', function () {
+          stopClock()
+          updateAod()
+        })
       })
     })
     stage('clock', startClock)

@@ -328,6 +328,56 @@ sind noch nicht gegen Hardware belegt:
   Klapp-Schritte zu verketten.
 - `time.getDay()` wird als 1 = Montag … 7 = Sonntag angenommen.
 
+## Veröffentlichen
+
+Ablauf laut [Watchface einreichen](https://docs.zepp.com/docs/distribute/watchface/)
+und [Spezifikation](https://docs.zepp.com/docs/watchface/specification/):
+
+1. Auf [console.zepp.com](https://console.zepp.com/) mit dem Zepp-Konto
+   anmelden.
+2. **App anlegen** und damit eine echte `appId` erhalten. Sie wird bei der
+   Registrierung automatisch vergeben und muss in `app.json` eingetragen
+   werden. Die `appId` im Paket **muss** mit der bei der Veröffentlichung
+   angegebenen übereinstimmen.
+3. `zeus build` erzeugt das `.zab`-Paket in `dist/`.
+4. In der Konsole unter **Application Services → Watchface** das Paket
+   hochladen. Die unterstützten Geräte erkennt die Konsole selbst aus dem
+   Paket.
+5. Ausfüllen: Land, Kategorie, Werkerklärung und je Sprache Name,
+   Beschreibung und Vorschaubild.
+6. **Submit for Approval.** Die Prüfung dauert in der Regel 1 bis 5
+   Werktage. Bei Ablehnung steht der Grund dabei, danach `Edit` und erneut
+   einreichen. Nach Freigabe laufen Änderungen über `Update`.
+
+### Vorgaben ans Vorschaubild
+
+Für 480 × 480 verlangt die Spezifikation ein Vorschaubild von **324 × 324**.
+Der Build skaliert `icon.png` selbst darauf herunter.
+
+Der Inhalt ist nicht frei wählbar, diese Beispielwerte sind vorgeschrieben:
+
+| Wert | Vorgabe | im Bild |
+| --- | --- | --- |
+| Uhrzeit | 10:09:36 | ja |
+| Puls | 86 bpm | ja |
+| Schritte | 8670 | ja |
+| Akku | 75 % | ja |
+| Datum | Februar oder August | WED 12 AUG |
+
+Erzeugt mit `design/shots/active.html?icon=1&preview=1`. Ohne `preview=1`
+zeigt dieselbe Seite die Alltagswerte für die README-Screenshots.
+
+### Offen vor dem Einreichen
+
+* **`appId` ist noch die Nummer aus der Vorlage** (20972) und in beiden
+  Projekten dieselbe. Ohne eigene, unterschiedliche IDs aus der Konsole
+  überschreiben sich Grün und Rot gegenseitig auf der Uhr, und die Einreichung
+  scheitert an der Prüfung „appId muss übereinstimmen".
+* **`vender` steht auf `zepp`**, ebenfalls aus der Vorlage. Dort gehört der
+  eigene Entwicklername hin.
+* **Namensrechte klären.** Name und Optik zitieren eine bekannte Filmreihe.
+  Das ist eine Frage an die Prüfung, nicht an den Code.
+
 ## Fehlersuche
 
 Jeder Aufbauschritt und jeder Callback meldet sich im Log, sichtbar in der

@@ -1,0 +1,83 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=VT323&display=swap">
+  <style>
+    body { margin: 0; background: #080908; font-family: 'VT323', 'Courier New', monospace; }
+    a { color: #ff2d2d; } a:hover { color: #ff9d9d; }
+    .col { position: absolute; top: 0; height: 440px; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; font-family: 'MS Gothic', 'Yu Gothic', monospace; }
+    .strand { white-space: pre; font-size: 15px; line-height: 19px; text-align: center; -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.35) 42%, rgba(0,0,0,1) 100%); mask-image: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.35) 42%, rgba(0,0,0,1) 100%); }
+    .head { font-size: 15px; line-height: 19px; font-family: 'MS Gothic', 'Yu Gothic', monospace; }
+    .scanlines { position: absolute; inset: 0; background: repeating-linear-gradient(to bottom, rgba(0,0,0,0.5) 0px, rgba(0,0,0,0.5) 1px, rgba(0,0,0,0) 1px, rgba(0,0,0,0) 3px); }
+    .vignette { position: absolute; inset: 0; background: radial-gradient(circle at 50% 42%, rgba(255,150,150,0.05) 0%, rgba(0,0,0,0) 55%), radial-gradient(circle at 50% 50%, rgba(0,0,0,0) 58%, rgba(0,0,0,0.72) 100%); }
+  </style>
+</helmet>
+<div style="width: 520px; height: 520px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at 50% 28%, #2b2f2d 0%, #161918 55%, #070807 100%);">
+  <div style="position: relative; width: 480px; height: 480px; border-radius: 50%; overflow: hidden; background: #000000; box-shadow: inset 0 0 0 2px #191c1b;">
+    <div style="position: absolute; inset: 0; color: rgba(255,45,45,0.62); filter: blur(0.4px);">
+      <sc-for list="{{cols}}" as="col" hint-placeholder-count="16">
+        <div class="col" style="left: {{col.left}}px; top: {{col.top}}px; opacity: {{col.op}};">
+          <span class="strand">{{col.text}}</span>
+          <span class="head" style="color: #fff0f0;">{{col.head}}</span>
+        </div>
+      </sc-for>
+    </div>
+    <div style="position: absolute; inset: 0; background: radial-gradient(ellipse 44% 40% at 50% 50%, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.84) 52%, rgba(0,0,0,0) 100%);"></div>
+
+    <div style="position: absolute; left: 0; right: 0; top: 148px; text-align: center; font-size: 26px; letter-spacing: 2px; color: rgba(255,45,45,0.45);">&gt; SYS.TIME</div>
+
+    <div style="position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%); display: flex; justify-content: center; align-items: baseline; gap: 10px;">
+      <span style="font-size: 104px; line-height: 0.95; letter-spacing: 2px; color: #ffd9d9; text-shadow: 0 0 6px rgba(255,45,45,0.75), 0 0 26px rgba(255,45,45,0.75), 0 0 54px rgba(255,45,45,0.4), 1.5px 0 0 rgba(0,190,255,0.35);">10:09</span>
+      <span style="font-size: 34px; line-height: 1; color: rgba(255,45,45,0.75);">36</span>
+      <span style="width: 10px; height: 30px; background: #ffd9d9; box-shadow: 0 0 12px rgba(255,45,45,0.75);"></span>
+    </div>
+
+    <div style="position: absolute; left: 110px; top: 296px; width: 260px; height: 1px; background: rgba(255,45,45,0.3);"></div>
+
+    <div style="position: absolute; left: 0; right: 0; top: 306px; display: flex; justify-content: center;">
+      <div style="display: grid; grid-template-columns: 100px auto; gap: 8px 0; font-size: 26px; line-height: 26px; letter-spacing: 1px; color: rgba(255,45,45,0.95); text-shadow: 0 0 10px rgba(255,45,45,0.4);">
+        <span style="color: rgba(255,45,45,0.45);">DATE</span><span>THU 10 SEP</span>
+        <span style="color: rgba(255,45,45,0.45);">STEPS</span><span>8670</span>
+        <span style="color: rgba(255,45,45,0.45);">HR</span><span>86 BPM</span>
+        <span style="color: rgba(255,45,45,0.45);">PWR</span><span>87%</span>
+      </div>
+    </div>
+
+    <div class="scanlines"></div>
+    <div class="vignette"></div>
+  </div>
+</div>
+</x-dc>
+<script data-dc-script data-props='{"$preview":{"width":520,"height":520}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var G = [];
+    for (var c = 0xff66; c <= 0xff9d; c++) G.push(String.fromCharCode(c));
+    function rnd(s) { var x = Math.sin(s * 88.3) * 24917.7713; return x - Math.floor(x); }
+
+    var cols = [];
+    for (var i = 0; i < 40; i++) {
+      var len = 6 + Math.floor(rnd(i + 1) * 8);
+      var t = [];
+      for (var j = 0; j < len; j++) t.push(G[Math.floor(rnd(i * 27.1 + j * 7.7 + 4) * G.length)]);
+      cols.push({
+        left: i * 12,
+        top: Math.round(rnd(i * 3.9 + 17) * 360) - 300,
+        text: t.join('
+'),
+        head: G[Math.floor(rnd(i * 5.9 + 21) * G.length)],
+        op: Math.round((0.35 + rnd(i + 7) * 0.5) * 100) / 100
+      });
+    }
+    return { cols: cols };
+  }
+}
+</script>
+</body>
+</html>
