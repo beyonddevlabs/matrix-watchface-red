@@ -1,0 +1,85 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap">
+  <style>
+    body { margin: 0; background: #080908; font-family: 'Share Tech Mono', 'MS Gothic', 'Yu Gothic', 'Noto Sans JP', monospace; }
+    a { color: #ff2d2d; } a:hover { color: #ff9d9d; }
+    .col { position: absolute; top: 0; height: 440px; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; animation-name: fall; animation-timing-function: linear; animation-iteration-count: infinite; will-change: transform; }
+    .strand { white-space: pre; font-size: 17px; line-height: 21px; text-align: center; -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.35) 42%, rgba(0,0,0,1) 100%); mask-image: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.35) 42%, rgba(0,0,0,1) 100%); }
+    .head { font-size: 17px; line-height: 21px; }
+    @keyframes fall { from { transform: translateY(-460px); } to { transform: translateY(520px); } }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.86; } }
+  </style>
+</helmet>
+<div style="width: 520px; height: 520px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at 50% 28%, #2b2f2d 0%, #161918 55%, #070807 100%);">
+  <div style="position: relative; width: 480px; height: 480px; border-radius: 50%; overflow: hidden; background: #000000; box-shadow: inset 0 0 0 2px #191c1b;">
+    <div style="position: absolute; inset: 0; color: {{dim}};">
+      <sc-for list="{{cols}}" as="col" hint-placeholder-count="12">
+        <div class="col" style="left: {{col.left}}px; animation-duration: {{col.dur}}s; animation-delay: {{col.delay}}s; opacity: {{col.op}};">
+          <span class="strand">{{col.text}}</span>
+          <span class="head" style="color: {{headC}}; text-shadow: 0 0 12px {{accent}};">{{col.head}}</span>
+        </div>
+      </sc-for>
+    </div>
+    <div style="position: absolute; inset: 0; background: radial-gradient(ellipse 62% 34% at 50% 47%, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.7) 45%, rgba(0,0,0,0) 100%);"></div>
+    <div style="position: absolute; inset: 6px; border-radius: 50%; background: conic-gradient(from 0deg, {{accent}} 0deg 264deg, rgba(255,255,255,0.06) 264deg 360deg); -webkit-mask-image: radial-gradient(circle at 50% 50%, transparent 0 227px, #000 229px); mask-image: radial-gradient(circle at 50% 50%, transparent 0 227px, #000 229px); opacity: 0.75;"></div>
+    <div style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;">
+      <div style="font-size: 132px; line-height: 1; letter-spacing: 2px; color: {{accent}}; text-shadow: 0 0 16px {{glow1}}, 0 0 44px {{glow2}}; animation: pulse 4s ease-in-out infinite;">21:37</div>
+      <div style="font-size: 17px; letter-spacing: 9px; color: {{dateC}}; padding-left: 9px;">THU 10 SEP</div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script data-dc-script data-props='{"$preview":{"width":520,"height":520},"accent":{"editor":"color","default":"#ff2d2d","options":["#ff2d2d","#ff6b6b","#ff8b3d","#ff2d8b"]},"density":{"editor":"int","default":34,"min":8,"max":48},"speed":{"editor":"range","default":1,"min":0.3,"max":2.5,"step":0.1}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var accent = this.props.accent || '#ff2d2d';
+    var density = this.props.density || 34;
+    var speed = this.props.speed || 1;
+    var G = [];
+    for (var c = 0xff66; c <= 0xff9d; c++) G.push(String.fromCharCode(c));
+    G = G.concat('0123456789=+*'.split(''));
+    function rnd(s) { var x = Math.sin(s * 91.7) * 31871.4531; return x - Math.floor(x); }
+    function rgba(hex, a) {
+      var h = String(hex).replace('#', '');
+      if (h.length === 3) h = h.charAt(0) + h.charAt(0) + h.charAt(1) + h.charAt(1) + h.charAt(2) + h.charAt(2);
+      var n = parseInt(h, 16);
+      if (isNaN(n)) n = 0xff2d2d;
+      return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')';
+    }
+    var cols = [];
+    var step = 480 / density;
+    for (var i = 0; i < density; i++) {
+      var len = 9 + Math.floor(rnd(i + 1) * 13);
+      var t = [];
+      for (var j = 0; j < len; j++) t.push(G[Math.floor(rnd(i * 23.3 + j * 11.9 + 5) * G.length)]);
+      cols.push({
+        left: Math.round(i * step + (rnd(i + 9) - 0.5) * step * 0.4),
+        text: t.join('\n'),
+        head: G[Math.floor(rnd(i * 6.7 + 13) * G.length)],
+        dur: Math.round((5 + rnd(i + 5) * 8) / speed * 10) / 10,
+        delay: -Math.round(rnd(i + 2) * 130) / 10,
+        op: Math.round((0.45 + rnd(i + 7) * 0.55) * 100) / 100
+      });
+    }
+    return {
+      accent: accent,
+      dim: rgba(accent, 0.8),
+      headC: '#fff0f0',
+      dateC: rgba(accent, 0.6),
+      glow1: rgba(accent, 0.9),
+      glow2: rgba(accent, 0.45),
+      cols: cols
+    };
+  }
+}
+</script>
+</body>
+</html>

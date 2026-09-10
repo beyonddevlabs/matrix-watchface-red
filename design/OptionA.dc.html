@@ -1,0 +1,128 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap">
+  <style>
+    body { margin: 0; background: #080908; font-family: 'Share Tech Mono', 'MS Gothic', 'Yu Gothic', 'Noto Sans JP', monospace; }
+    a { color: #ff2d2d; } a:hover { color: #ff9d9d; }
+    .col { position: absolute; top: 0; height: 440px; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; animation-name: fall; animation-timing-function: linear; animation-iteration-count: infinite; will-change: transform; }
+    .strand { white-space: pre; font-size: 16px; line-height: 20px; text-align: center; -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.3) 45%, rgba(0,0,0,1) 100%); mask-image: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.3) 45%, rgba(0,0,0,1) 100%); }
+    .head { font-size: 16px; line-height: 20px; }
+    @keyframes fall { from { transform: translateY(-460px); } to { transform: translateY(520px); } }
+    @keyframes flick { 0%, 86%, 100% { opacity: 1; } 90% { opacity: 0.18; } 94% { opacity: 0.8; } }
+  </style>
+</helmet>
+<div style="width: 520px; height: 520px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at 50% 28%, #2b2f2d 0%, #161918 55%, #070807 100%);">
+  <div style="position: relative; width: 480px; height: 480px; border-radius: 50%; overflow: hidden; background: #000000; box-shadow: inset 0 0 0 2px #191c1b;">
+    <div style="position: absolute; inset: 0; color: {{dim}};">
+      <sc-for list="{{cols}}" as="col" hint-placeholder-count="10">
+        <div class="col" style="left: {{col.left}}px; animation-duration: {{col.dur}}s; animation-delay: {{col.delay}}s; opacity: {{col.op}};">
+          <span class="strand">{{col.text}}</span>
+          <span class="head" style="color: {{headC}}; text-shadow: 0 0 10px {{accent}};">{{col.head}}</span>
+        </div>
+      </sc-for>
+    </div>
+    <div style="position: absolute; inset: 0; background: radial-gradient(circle at 50% 50%, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.66) 32%, rgba(0,0,0,0) 60%);"></div>
+    <div style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 30px;">
+      <div style="display: grid; grid-template-columns: {{tpl}}; grid-auto-rows: 16px;">
+        <sc-for list="{{cells}}" as="c" hint-placeholder-count="60">
+          <span style="font-size: 13px; line-height: 16px; text-align: center; color: {{c.color}}; text-shadow: {{c.shadow}}; animation: flick {{c.dur}}s linear infinite; animation-delay: {{c.delay}}s;">{{c.ch}}</span>
+        </sc-for>
+      </div>
+      <div style="font-size: 15px; letter-spacing: 7px; color: {{dateC}}; padding-left: 7px;">THU 10 SEP</div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script data-dc-script data-props='{"$preview":{"width":520,"height":520},"accent":{"editor":"color","default":"#ff2d2d","options":["#ff2d2d","#ff6b6b","#ff8b3d","#ff2d8b"]},"density":{"editor":"int","default":26,"min":6,"max":44},"speed":{"editor":"range","default":1,"min":0.3,"max":2.5,"step":0.1}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var accent = this.props.accent || '#ff2d2d';
+    var density = this.props.density || 26;
+    var speed = this.props.speed || 1;
+    var G = [];
+    for (var c = 0xff66; c <= 0xff9d; c++) G.push(String.fromCharCode(c));
+    G = G.concat('0123456789=+*'.split(''));
+    function rnd(s) { var x = Math.sin(s * 127.1) * 43758.5453; return x - Math.floor(x); }
+    function rgba(hex, a) {
+      var h = String(hex).replace('#', '');
+      if (h.length === 3) h = h.charAt(0) + h.charAt(0) + h.charAt(1) + h.charAt(1) + h.charAt(2) + h.charAt(2);
+      var n = parseInt(h, 16);
+      if (isNaN(n)) n = 0xff2d2d;
+      return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')';
+    }
+    var cols = [];
+    var step = 480 / density;
+    for (var i = 0; i < density; i++) {
+      var len = 7 + Math.floor(rnd(i + 1) * 14);
+      var t = [];
+      for (var j = 0; j < len; j++) t.push(G[Math.floor(rnd(i * 31.7 + j * 7.3 + 3) * G.length)]);
+      cols.push({
+        left: Math.round(i * step + (rnd(i + 9) - 0.5) * step * 0.5),
+        text: t.join('\n'),
+        head: G[Math.floor(rnd(i * 5.1 + 11) * G.length)],
+        dur: Math.round((6 + rnd(i + 5) * 9) / speed * 10) / 10,
+        delay: -Math.round(rnd(i + 2) * 150) / 10,
+        op: Math.round((0.3 + rnd(i + 7) * 0.55) * 100) / 100
+      });
+    }
+    var P = {
+      '0': ['11111', '10001', '10001', '10001', '10001', '10001', '11111'],
+      '1': ['00100', '01100', '00100', '00100', '00100', '00100', '01110'],
+      '2': ['11111', '00001', '00001', '11111', '10000', '10000', '11111'],
+      '3': ['11111', '00001', '00001', '11111', '00001', '00001', '11111'],
+      '4': ['10001', '10001', '10001', '11111', '00001', '00001', '00001'],
+      '5': ['11111', '10000', '10000', '11111', '00001', '00001', '11111'],
+      '6': ['11111', '10000', '10000', '11111', '10001', '10001', '11111'],
+      '7': ['11111', '00001', '00010', '00100', '01000', '01000', '01000'],
+      '8': ['11111', '10001', '10001', '11111', '10001', '10001', '11111'],
+      '9': ['11111', '10001', '10001', '11111', '00001', '00001', '11111'],
+      ':': ['0', '1', '0', '0', '0', '1', '0']
+    };
+    var time = '21:37';
+    var blank = ['0', '0', '0', '0', '0', '0', '0'];
+    var blocks = [];
+    for (var k = 0; k < time.length; k++) {
+      if (k) blocks.push(blank);
+      blocks.push(P[time.charAt(k)]);
+    }
+    var rows = [];
+    for (var r = 0; r < 7; r++) {
+      var s = '';
+      for (var b = 0; b < blocks.length; b++) s += blocks[b][r];
+      rows.push(s);
+    }
+    var W = rows[0].length;
+    var cells = [];
+    for (var r2 = 0; r2 < 7; r2++) {
+      for (var c2 = 0; c2 < W; c2++) {
+        var lit = rows[r2].charAt(c2) === '1';
+        cells.push({
+          ch: G[Math.floor(rnd(r2 * 41.3 + c2 * 13.9 + 7) * G.length)],
+          color: lit ? accent : rgba(accent, 0.1),
+          shadow: lit ? '0 0 10px ' + rgba(accent, 0.85) + ', 0 0 24px ' + rgba(accent, 0.4) : 'none',
+          dur: lit ? Math.round((3 + rnd(r2 * 3.3 + c2) * 4) * 10) / 10 : 0,
+          delay: lit ? -Math.round(rnd(c2 * 7.7 + r2) * 60) / 10 : 0
+        });
+      }
+    }
+    return {
+      accent: accent,
+      dim: rgba(accent, 0.62),
+      headC: '#ffe6e6',
+      dateC: rgba(accent, 0.55),
+      cols: cols,
+      cells: cells,
+      tpl: 'repeat(' + W + ', 14px)'
+    };
+  }
+}
+</script>
+</body>
+</html>

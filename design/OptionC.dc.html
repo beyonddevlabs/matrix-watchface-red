@@ -1,0 +1,97 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap">
+  <style>
+    body { margin: 0; background: #080908; font-family: 'Share Tech Mono', 'MS Gothic', 'Yu Gothic', 'Noto Sans JP', monospace; }
+    a { color: #ff2d2d; } a:hover { color: #ff9d9d; }
+    .col { position: absolute; top: 0; height: 440px; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; animation-name: fall; animation-timing-function: linear; animation-iteration-count: infinite; will-change: transform; }
+    .strand { white-space: pre; font-size: 16px; line-height: 20px; text-align: center; -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.3) 45%, rgba(0,0,0,1) 100%); mask-image: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.3) 45%, rgba(0,0,0,1) 100%); }
+    .head { font-size: 16px; line-height: 20px; }
+    @keyframes fall { from { transform: translateY(-460px); } to { transform: translateY(520px); } }
+    @keyframes blink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+  </style>
+</helmet>
+<div style="width: 520px; height: 520px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at 50% 28%, #2b2f2d 0%, #161918 55%, #070807 100%);">
+  <div style="position: relative; width: 480px; height: 480px; border-radius: 50%; overflow: hidden; background: #000000; box-shadow: inset 0 0 0 2px #191c1b;">
+    <div style="position: absolute; inset: 0; color: {{dim}}; -webkit-mask-image: radial-gradient(circle at 50% 50%, transparent 0 148px, #000 214px); mask-image: radial-gradient(circle at 50% 50%, transparent 0 148px, #000 214px);">
+      <sc-for list="{{cols}}" as="col" hint-placeholder-count="12">
+        <div class="col" style="left: {{col.left}}px; animation-duration: {{col.dur}}s; animation-delay: {{col.delay}}s; opacity: {{col.op}};">
+          <span class="strand">{{col.text}}</span>
+          <span class="head" style="color: {{headC}}; text-shadow: 0 0 10px {{accent}};">{{col.head}}</span>
+        </div>
+      </sc-for>
+    </div>
+    <div style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 12px; padding: 0 108px;">
+      <div style="font-size: 14px; letter-spacing: 3px; color: {{labelC}};">&gt; SYS.TIME</div>
+      <div style="display: flex; align-items: baseline; gap: 10px;">
+        <span style="font-size: 74px; line-height: 0.9; letter-spacing: 1px; color: {{accent}}; text-shadow: 0 0 14px {{glow1}}, 0 0 38px {{glow2}};">21:37</span>
+        <span style="font-size: 26px; line-height: 1; color: {{secC}};">04</span>
+        <span style="width: 11px; height: 26px; background: {{accent}}; animation: blink 1.1s steps(1, end) infinite;"></span>
+      </div>
+      <div style="width: 264px; height: 1px; background: {{ruleC}}; margin: 4px 0 2px;"></div>
+      <div style="display: grid; grid-template-columns: 78px 1fr; gap: 9px 0; font-size: 16px; letter-spacing: 1px;">
+        <span style="color: {{labelC}};">DATE</span><span style="color: {{valueC}};">THU 10 SEP</span>
+        <span style="color: {{labelC}};">HR</span><span style="color: {{valueC}};">62 BPM</span>
+        <span style="color: {{labelC}};">STEPS</span><span style="color: {{valueC}};">8412</span>
+        <span style="color: {{labelC}};">PWR</span><span style="color: {{valueC}};">87%</span>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script data-dc-script data-props='{"$preview":{"width":520,"height":520},"accent":{"editor":"color","default":"#ff2d2d","options":["#ff2d2d","#ff6b6b","#ff8b3d","#ff2d8b"]},"speed":{"editor":"range","default":1,"min":0.3,"max":2.5,"step":0.1}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var accent = this.props.accent || '#ff2d2d';
+    var speed = this.props.speed || 1;
+    var density = 30;
+    var G = [];
+    for (var c = 0xff66; c <= 0xff9d; c++) G.push(String.fromCharCode(c));
+    G = G.concat('0123456789=+*'.split(''));
+    function rnd(s) { var x = Math.sin(s * 57.3) * 21437.9137; return x - Math.floor(x); }
+    function rgba(hex, a) {
+      var h = String(hex).replace('#', '');
+      if (h.length === 3) h = h.charAt(0) + h.charAt(0) + h.charAt(1) + h.charAt(1) + h.charAt(2) + h.charAt(2);
+      var n = parseInt(h, 16);
+      if (isNaN(n)) n = 0xff2d2d;
+      return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')';
+    }
+    var cols = [];
+    var step = 480 / density;
+    for (var i = 0; i < density; i++) {
+      var len = 8 + Math.floor(rnd(i + 1) * 12);
+      var t = [];
+      for (var j = 0; j < len; j++) t.push(G[Math.floor(rnd(i * 17.9 + j * 9.1 + 2) * G.length)]);
+      cols.push({
+        left: Math.round(i * step + (rnd(i + 9) - 0.5) * step * 0.5),
+        text: t.join('\n'),
+        head: G[Math.floor(rnd(i * 4.3 + 19) * G.length)],
+        dur: Math.round((6 + rnd(i + 5) * 9) / speed * 10) / 10,
+        delay: -Math.round(rnd(i + 2) * 140) / 10,
+        op: Math.round((0.35 + rnd(i + 7) * 0.5) * 100) / 100
+      });
+    }
+    return {
+      accent: accent,
+      dim: rgba(accent, 0.65),
+      headC: '#ffe6e6',
+      labelC: rgba(accent, 0.45),
+      valueC: rgba(accent, 0.92),
+      secC: rgba(accent, 0.7),
+      ruleC: rgba(accent, 0.28),
+      glow1: rgba(accent, 0.85),
+      glow2: rgba(accent, 0.4),
+      cols: cols
+    };
+  }
+}
+</script>
+</body>
+</html>

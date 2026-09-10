@@ -1,0 +1,29 @@
+{
+  "pages": [
+    { "id": "page-1", "name": "Matrix Watchface" },
+    { "id": "page-2", "name": "Ideen / erste Runde" }
+  ],
+  "artboards": [
+    { "file": "Main.dc.html", "x": 0, "y": 0, "w": 520, "h": 520, "title": "Aktiv - Phosphor CRT (F)", "page": "page-1", "is_interactive": true },
+    { "file": "AOD.dc.html", "x": 640, "y": 0, "w": 520, "h": 520, "title": "Always-On", "page": "page-1" },
+    { "file": "OptionA.dc.html", "x": 0, "y": 0, "w": 520, "h": 520, "title": "A - Glyph Time", "page": "page-2" },
+    { "file": "OptionB.dc.html", "x": 640, "y": 0, "w": 520, "h": 520, "title": "B - Full Rain", "page": "page-2" },
+    { "file": "OptionC.dc.html", "x": 1280, "y": 0, "w": 520, "h": 520, "title": "C - Terminal HUD", "page": "page-2" },
+    { "file": "OptionD.dc.html", "x": 1920, "y": 0, "w": 520, "h": 520, "title": "D - Sparse", "page": "page-2" },
+    { "file": "OptionE.dc.html", "x": 2560, "y": 0, "w": 520, "h": 520, "title": "E - Decode on wake", "page": "page-2" },
+    { "file": "OptionG.dc.html", "x": 3200, "y": 0, "w": 520, "h": 520, "title": "G - Falling Strand", "page": "page-2" }
+  ],
+  "annotations": [
+    { "id": "brief", "x": 0, "y": -230, "w": 1160, "page": "page-1", "text": "Matrix Watchface - Amazfit T-Rex 3 Pro 48mm (480 x 480 rund, deviceSource 10551552 / 10551553 / 10551555, API 4.2)\nOption F als Basis: Phosphor-CRT mit Scanlines, Bloom und laufendem Band. Regen mit Dichte 48 und Tempo 1.5, Uhrzeit exakt mittig, > SYS.TIME und blinkender Cursor bleiben." },
+    { "id": "note-main", "x": 0, "y": 545, "w": 520, "page": "page-1", "text": "Die Anzeige laeuft live: Sekunden klappen jede Sekunde, Schritte alle 4 s, Puls alle 5 s. Beim Sprung von 9 auf 2 rollt die Walze vorwaerts durch 0 und 1 durch - wie eine Fallblattanzeige. Die feine dunkle Linie quer durch jede Ziffer ist die Klappkante.\nHH:MM steht exakt in der Bildmitte; Sekunden und Cursor haengen rechts daneben, damit die Uhrzeit beim Klappen nie wandert." },
+    { "id": "note-aod", "x": 640, "y": 545, "w": 520, "page": "page-1", "text": "Always-On: nur die Anzeige, kein Matrix-Regen, keine Sekunden, kein Klappen - der Regen ist tatsaechlich der teuerste Teil.\nZiffern als 2px-Kontur an exakt derselben Stelle und in derselben Groesse wie im aktiven Zustand, damit beim Umschalten nichts springt. Schwarzer Grund, weit unter der 10%-Pixelgrenze." },
+    { "id": "brief-2", "x": 0, "y": -170, "w": 3720, "page": "page-2", "text": "Erste Runde und weitere Ideen - nur noch als Referenz. F ist zur aktiven Anzeige auf Seite 1 geworden." },
+    { "id": "note-a", "x": 0, "y": 545, "w": 520, "page": "page-2", "text": "Die Uhrzeit IST der Regen: ein 25 x 7 Kana-Feld, in dem die hellen Zellen die Zeit ergeben." },
+    { "id": "note-b", "x": 640, "y": 545, "w": 520, "page": "page-2", "text": "Dichter Regen bis zum Rand, massive Ziffern, Sekunden als Bogen am Rand." },
+    { "id": "note-c", "x": 1280, "y": 545, "w": 520, "page": "page-2", "text": "Regen nur am Rand, in der Mitte ein Terminal-Ausdruck." },
+    { "id": "note-d", "x": 1920, "y": 545, "w": 520, "page": "page-2", "text": "Neun langsame Spalten, hohle Ziffern, sehr wenige leuchtende Pixel." },
+    { "id": "note-e", "x": 2560, "y": 545, "w": 520, "page": "page-2", "text": "Der Regen loest sich beim Handheben in die Uhrzeit auf - hier mit der letzten Ziffer noch im Lauf." },
+    { "id": "note-g", "x": 3200, "y": 545, "w": 520, "page": "page-2", "text": "Die Uhrzeit haengt als heller Strang im Regen, Stunde ueber Minute." }
+  ],
+  "launch": { "view": "canvas", "page": "page-1" }
+}

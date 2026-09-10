@@ -1,0 +1,37 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Matrix Watchface - always-on</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500&display=swap">
+<style>
+  html, body { margin: 0; background: #080908; }
+  body { width: 520px; height: 520px; overflow: hidden; font-family: 'Chakra Petch', 'Arial Narrow', sans-serif; }
+  .bezel { width: 520px; height: 520px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at 50% 28%, #2b2f2d 0%, #161918 55%, #070807 100%); }
+  .screen { position: relative; width: 480px; height: 480px; border-radius: 50%; overflow: hidden; background: #000; box-shadow: inset 0 0 0 2px #191c1b; }
+  .timewrap { position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%); display: flex; justify-content: center; }
+  .time { display: flex; align-items: flex-start; color: transparent; -webkit-text-stroke: 2px rgba(255,45,45,0.95); }
+  .cellbig { position: relative; width: 51px; height: 76px; overflow: hidden; }
+  .stripbig { position: absolute; left: 0; top: 0; width: 51px; font-size: 80px; line-height: 76px; text-align: center; }
+  .colon { width: 20px; height: 76px; font-size: 80px; line-height: 76px; text-align: center; }
+  .gridwrap { position: absolute; left: 0; right: 0; top: 308px; display: flex; justify-content: center; }
+  .grid { display: grid; grid-template-columns: 96px auto; gap: 6px 0; font-size: 22px; line-height: 26px; letter-spacing: 1px; color: rgba(255,45,45,0.72); }
+  .lbl { color: rgba(255,45,45,0.38); }
+</style>
+</head>
+<body>
+<div class="bezel"><div class="screen">
+  <div class="timewrap"><div class="time">
+    <div class="cellbig"><div class="stripbig">1</div></div>
+    <div class="cellbig"><div class="stripbig">0</div></div>
+    <div class="colon">:</div>
+    <div class="cellbig"><div class="stripbig">0</div></div>
+    <div class="cellbig"><div class="stripbig">9</div></div>
+  </div></div>
+  <div class="gridwrap"><div class="grid">
+    <span class="lbl">DATE</span><span>THU 10 SEP</span>
+    <span class="lbl">STEPS</span><span>8670</span>
+  </div></div>
+</div></div>
+</body>
+</html>

@@ -1,0 +1,66 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap">
+  <style>
+    body { margin: 0; background: #080908; font-family: 'Share Tech Mono', 'MS Gothic', 'Yu Gothic', 'Noto Sans JP', monospace; }
+    a { color: #ff2d2d; } a:hover { color: #ff9d9d; }
+    .cellbig { position: relative; width: 44px; height: 76px; overflow: hidden; }
+    .stripbig { position: absolute; left: 0; top: 0; width: 44px; font-size: 80px; line-height: 76px; text-align: center; }
+  </style>
+</helmet>
+<div style="width: 520px; height: 520px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at 50% 28%, #2b2f2d 0%, #161918 55%, #070807 100%);">
+  <div style="position: relative; width: 480px; height: 480px; border-radius: 50%; overflow: hidden; background: #000000; box-shadow: inset 0 0 0 2px #191c1b;">
+
+    <div style="position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%); display: flex; justify-content: center;">
+      <div style="display: flex; align-items: flex-start; color: transparent; -webkit-text-stroke: 2px {{strokeC}};">
+        <sc-for list="{{hh}}" as="d" hint-placeholder-count="2">
+          <div class="cellbig"><div class="stripbig">{{d.ch}}</div></div>
+        </sc-for>
+        <div style="width: 24px; height: 76px; font-size: 80px; line-height: 76px; text-align: center;">:</div>
+        <sc-for list="{{mm}}" as="d" hint-placeholder-count="2">
+          <div class="cellbig"><div class="stripbig">{{d.ch}}</div></div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="position: absolute; left: 0; right: 0; top: 308px; display: flex; justify-content: center;">
+      <div style="display: grid; grid-template-columns: 96px auto; gap: 6px 0; font-size: 22px; line-height: 26px; letter-spacing: 1px; color: {{valueC}};">
+        <span style="color: {{labelC}};">DATE</span>
+        <span>THU 10 SEP</span>
+        <span style="color: {{labelC}};">STEPS</span>
+        <span>8670</span>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script data-dc-script data-props='{"$preview":{"width":520,"height":520},"accent":{"editor":"color","default":"#ff2d2d","options":["#ff2d2d","#ff6b6b","#ff8b3d","#ffffff"]}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var accent = this.props.accent || '#ff2d2d';
+    function rgba(hex, a) {
+      var h = String(hex).replace('#', '');
+      if (h.length === 3) h = h.charAt(0) + h.charAt(0) + h.charAt(1) + h.charAt(1) + h.charAt(2) + h.charAt(2);
+      var n = parseInt(h, 16);
+      if (isNaN(n)) n = 0xff2d2d;
+      return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')';
+    }
+    return {
+      strokeC: rgba(accent, 0.95),
+      labelC: rgba(accent, 0.38),
+      valueC: rgba(accent, 0.72),
+      hh: [{ ch: '1' }, { ch: '0' }],
+      mm: [{ ch: '0' }, { ch: '9' }]
+    };
+  }
+}
+</script>
+</body>
+</html>

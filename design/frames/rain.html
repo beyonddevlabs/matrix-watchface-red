@@ -1,0 +1,78 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>rain frame</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap">
+<style>
+  html, body { margin: 0; background: #000; }
+  body { width: 480px; height: 480px; overflow: hidden; font-family: 'Share Tech Mono', 'MS Gothic', 'Yu Gothic', monospace; }
+  .screen { position: relative; width: 480px; height: 480px; overflow: hidden; background: #000; }
+  .rain { position: absolute; inset: 0; filter: blur(0.4px); }
+  .col { position: absolute; top: -432px; width: 10px; text-align: center; }
+  .col span { display: block; height: 18px; font-size: 14px; line-height: 18px; }
+  .scrim { position: absolute; inset: 0; background: radial-gradient(ellipse 44% 40% at 50% 50%, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.84) 52%, rgba(0,0,0,0) 100%); }
+  .scanlines { position: absolute; inset: 0; background: repeating-linear-gradient(to bottom, rgba(0,0,0,0.5) 0px, rgba(0,0,0,0.5) 1px, rgba(0,0,0,0) 1px, rgba(0,0,0,0) 3px); }
+  .vignette { position: absolute; inset: 0; background: radial-gradient(circle at 50% 42%, rgba(255,150,150,0.05) 0%, rgba(0,0,0,0) 55%), radial-gradient(circle at 50% 50%, rgba(0,0,0,0) 58%, rgba(0,0,0,0.72) 100%); }
+</style>
+</head>
+<body>
+<div class="screen">
+  <div class="rain" id="rain"></div>
+  <div class="scrim"></div>
+  <div class="scanlines"></div>
+  <div class="vignette"></div>
+</div>
+<script>
+// One frame of the loop. Each column is a strand of PERIOD glyphs repeated
+// twice and shifted by whole glyph rows, so after FRAMES frames every column
+// has travelled a whole number of periods and frame 0 follows seamlessly.
+var FRAMES = 24;
+var PERIOD = 24;   // must divide FRAMES, otherwise the loop does not close
+var STRAND = 10;   // glyphs per strand, the rest of the period stays dark
+var PITCH = 18;
+var DENSITY = 48;
+
+var frame = parseInt((location.search.match(/f=(\d+)/) || [0, 0])[1], 10) || 0;
+
+var G = [];
+for (var c = 0xff66; c <= 0xff9d; c++) G.push(String.fromCharCode(c));
+G = G.concat('0123456789=+*'.split(''));
+function rnd(s) { var x = Math.sin(s * 88.3) * 24917.7713; return x - Math.floor(x); }
+
+var html = '';
+for (var i = 0; i < DENSITY; i++) {
+  // 1, 2 or 3 glyph rows per frame - different speeds, all still seamless.
+  var speed = 1 + Math.floor(rnd(i + 5) * 3);
+  // A fixed phase per column, so the strands are scattered instead of all
+  // starting at the same height. Constant per column, so the loop still closes.
+  var phase = Math.floor(rnd(i * 3.9 + 17) * PERIOD);
+  var offset = ((frame * speed + phase) % PERIOD) * PITCH;
+  var dim = 0.55 + rnd(i + 7) * 0.45;
+  var rows = '';
+
+  for (var rep = 0; rep < 2; rep++) {
+    for (var j = 0; j < PERIOD; j++) {
+      var fromHead = PERIOD - 1 - j;
+      if (fromHead >= STRAND) {
+        // The gap between strands - this is what makes them read as drops.
+        rows += '<span></span>';
+        continue;
+      }
+      var glyph = G[Math.floor(rnd(i * 27.1 + j * 7.7 + 4) * G.length)];
+      if (fromHead === 0) {
+        rows += '<span style="color:#fff0f0;text-shadow:0 0 12px #ff2d2d">' + glyph + '</span>';
+      } else {
+        // Trail fades upwards away from the head.
+        var level = (0.85 - 0.72 * (fromHead / STRAND)) * dim;
+        rows += '<span style="color:rgba(255,45,45,' + level.toFixed(3) + ')">' + glyph + '</span>';
+      }
+    }
+  }
+
+  html += '<div class="col" style="left:' + (i * 10) + 'px;transform:translateY(' + offset + 'px)">' + rows + '</div>';
+}
+document.getElementById('rain').innerHTML = html;
+</script>
+</body>
+</html>
