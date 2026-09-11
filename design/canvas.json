@@ -2,7 +2,7 @@
   "pages": [
     {
       "id": "page-3",
-      "name": "Schriften"
+      "name": "Typefaces"
     },
     {
       "id": "page-1",
@@ -10,7 +10,7 @@
     },
     {
       "id": "page-2",
-      "name": "Ideen / erste Runde"
+      "name": "Ideas / first round"
     }
   ],
   "artboards": [
@@ -20,7 +20,7 @@
       "y": 0,
       "w": 520,
       "h": 520,
-      "title": "Aktiv - Phosphor CRT (F)",
+      "title": "Active - Phosphor CRT (F)",
       "page": "page-1",
       "is_interactive": true
     },
@@ -131,7 +131,7 @@
       "y": -230,
       "w": 1160,
       "page": "page-1",
-      "text": "Matrix Watchface - Amazfit T-Rex 3 Pro 48mm (480 x 480 rund, deviceSource 10551552 / 10551553 / 10551555, API 4.2)\nOption F als Basis: Phosphor-CRT mit Scanlines, Bloom und laufendem Band. Regen mit Dichte 48 und Tempo 1.5, Uhrzeit exakt mittig, > SYS.TIME und blinkender Cursor bleiben."
+      "text": "Matrix Watchface - Amazfit T-Rex 3 Pro 48mm (480 x 480 round, deviceSource 10551552 / 10551553 / 10551555, API 4.2)\nOption F as the base: phosphor CRT with scanlines, bloom and a travelling band. Rain at density 48 and speed 1.5, time exactly centred, > SYS.TIME and the blinking cursor stay."
     },
     {
       "id": "note-main",
@@ -139,7 +139,7 @@
       "y": 545,
       "w": 520,
       "page": "page-1",
-      "text": "Die Anzeige laeuft live: Sekunden klappen jede Sekunde, Schritte alle 4 s, Puls alle 5 s. Beim Sprung von 9 auf 2 rollt die Walze vorwaerts durch 0 und 1 durch - wie eine Fallblattanzeige. Die feine dunkle Linie quer durch jede Ziffer ist die Klappkante.\nHH:MM steht exakt in der Bildmitte; Sekunden und Cursor haengen rechts daneben, damit die Uhrzeit beim Klappen nie wandert."
+      "text": "The face runs live: seconds flap every second, steps every 4 s, heart rate every 5 s. On a jump from 9 to 2 the reel rolls forward through 0 and 1 - like a split-flap display. The fine dark line across every digit is the flap edge.\nHH:MM sits exactly in the centre of the screen; seconds and cursor hang to the right of it, so the time never shifts while flapping."
     },
     {
       "id": "note-aod",
@@ -147,7 +147,7 @@
       "y": 545,
       "w": 520,
       "page": "page-1",
-      "text": "Always-On: nur die Anzeige, kein Matrix-Regen, keine Sekunden, kein Klappen - der Regen ist tatsaechlich der teuerste Teil.\nZiffern als 2px-Kontur an exakt derselben Stelle und in derselben Groesse wie im aktiven Zustand, damit beim Umschalten nichts springt. Schwarzer Grund, weit unter der 10%-Pixelgrenze."
+      "text": "Always-on: the readout only, no Matrix rain, no seconds, no flapping - the rain really is the most expensive part.\nDigits as a 2px outline at exactly the same position and size as in the active state, so nothing jumps when switching. Black background, well under the 10% pixel limit."
     },
     {
       "id": "brief-2",
@@ -155,7 +155,7 @@
       "y": -170,
       "w": 3720,
       "page": "page-2",
-      "text": "Erste Runde und weitere Ideen - nur noch als Referenz. F ist zur aktiven Anzeige auf Seite 1 geworden."
+      "text": "First round and further ideas - kept for reference only. F became the active face on page 1."
     },
     {
       "id": "note-a",
@@ -163,7 +163,7 @@
       "y": 545,
       "w": 520,
       "page": "page-2",
-      "text": "Die Uhrzeit IST der Regen: ein 25 x 7 Kana-Feld, in dem die hellen Zellen die Zeit ergeben."
+      "text": "The time IS the rain: a 25 x 7 kana grid in which the bright cells form the time."
     },
     {
       "id": "note-b",
@@ -171,7 +171,7 @@
       "y": 545,
       "w": 520,
       "page": "page-2",
-      "text": "Dichter Regen bis zum Rand, massive Ziffern, Sekunden als Bogen am Rand."
+      "text": "Dense rain all the way to the edge, solid digits, seconds as an arc along the rim."
     },
     {
       "id": "note-c",
@@ -179,7 +179,7 @@
       "y": 545,
       "w": 520,
       "page": "page-2",
-      "text": "Regen nur am Rand, in der Mitte ein Terminal-Ausdruck."
+      "text": "Rain only around the edge, a terminal printout in the middle."
     },
     {
       "id": "note-d",
@@ -187,7 +187,7 @@
       "y": 545,
       "w": 520,
       "page": "page-2",
-      "text": "Neun langsame Spalten, hohle Ziffern, sehr wenige leuchtende Pixel."
+      "text": "Nine slow columns, hollow digits, very few lit pixels."
     },
     {
       "id": "note-e",
@@ -195,7 +195,7 @@
       "y": 545,
       "w": 520,
       "page": "page-2",
-      "text": "Der Regen loest sich beim Handheben in die Uhrzeit auf - hier mit der letzten Ziffer noch im Lauf."
+      "text": "The rain resolves into the time on wrist raise - shown here with the last digit still running."
     },
     {
       "id": "note-g",
@@ -203,7 +203,7 @@
       "y": 545,
       "w": 520,
       "page": "page-2",
-      "text": "Die Uhrzeit haengt als heller Strang im Regen, Stunde ueber Minute."
+      "text": "The time hangs in the rain as a bright strand, hour above minute."
     },
     {
       "id": "note-fontvt323",
@@ -211,7 +211,7 @@
       "y": 545,
       "w": 520,
       "page": "page-3",
-      "text": "Der Terminal-Klassiker: schmal, hoch, kantige Ecken, kein einziger runder Bogen. Echte Monospace, jede Ziffer gleich breit - das braucht die Klappwalze.\nAm naechsten am CRT-Bild. Nachteil: sehr duenn, auf dem Handgelenk im Sonnenlicht der schwaechste Kandidat."
+      "text": "The terminal classic: narrow, tall, hard corners, not a single round curve. True monospace, every digit the same width - which is what the flap reel needs.\nClosest to the CRT look. Downside: very thin, the weakest candidate on the wrist in sunlight."
     },
     {
       "id": "note-fontsilkscreen",
@@ -219,7 +219,7 @@
       "y": 545,
       "w": 520,
       "page": "page-3",
-      "text": "Hartes Pixelraster, jede Ziffer aus sichtbaren Bloecken. Das eckigste, was es gibt, und es passt zum Kana-Regen daneben.\nNachteil: proportional, keine gleich breiten Ziffern - fuer die Klappwalze muessten die Zellen fest bleiben. Klein wirkt es schnell unruhig."
+      "text": "A hard pixel grid, every digit made of visible blocks. The most angular thing there is, and it fits the kana rain next to it.\nDownside: proportional, no equal-width digits - the flap reel would need the cells to stay fixed. At small sizes it quickly looks restless."
     },
     {
       "id": "note-fontchakra",
@@ -227,7 +227,7 @@
       "y": 545,
       "w": 520,
       "page": "page-3",
-      "text": "Abgeschnittene Ecken statt Rundungen, technisch, sehr gut lesbar - der ruhigste der vier.\nNachteil: eher Sci-Fi-Interface als Matrix, und proportional."
+      "text": "Cut corners instead of rounding, technical, very legible - the calmest of the four.\nDownside: reads more like a sci-fi interface than Matrix, and it is proportional."
     },
     {
       "id": "note-fontdoto",
@@ -235,7 +235,7 @@
       "y": 545,
       "w": 520,
       "page": "page-3",
-      "text": "Punktmatrix: die Ziffern bestehen aus einzelnen Punkten, wie eine LED-Anzeige. Naechster Verwandter zur Glyph-Time-Idee aus der ersten Runde.\nNachteil: bei kleinen Groessen zerfaellt sie, deshalb hier nur die Uhrzeit gross."
+      "text": "Dot matrix: the digits are made of individual dots, like an LED display. The closest relative to the glyph-time idea from the first round.\nDownside: it falls apart at small sizes, which is why only the time is large here."
     },
     {
       "id": "brief-3",
@@ -243,7 +243,7 @@
       "y": -230,
       "w": 2440,
       "page": "page-3",
-      "text": "Schriftvorschlaege - dieselbe Anzeige, vier Schnitte. Alle vier liegen unter der Open Font License, duerfen also mitgeliefert werden.\nDer Kana-Regen bleibt in jeder Variante gleich: keine dieser Schriften enthaelt Katakana, dafuer springt das System auf seine CJK-Schrift um. Geaendert wird also nur Uhrzeit, Label und die Datenzeilen."
+      "text": "Typeface proposals - the same face in four cuts. All four are under the Open Font License, so they may be bundled.\nThe kana rain stays the same in every variant: none of these fonts contains katakana, so the system falls back to its CJK font. Only the time, the labels and the data rows change."
     }
   ],
   "launch": {

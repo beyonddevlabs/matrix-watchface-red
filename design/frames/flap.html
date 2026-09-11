@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <title>flap frame</title>
 <style>
-  /* Schrift lokal aus dem Projekt, nicht ueber das Netz: sonst kann ein Frame
-     gerendert werden, bevor die Webschrift da ist, und faellt auf Arial zurueck. */
+  /* Font loaded locally from the project, not over the network: otherwise a
+     frame can be rendered before the web font has arrived and falls back to Arial. */
   @font-face {
     font-family: 'Chakra Petch';
     src: url('../../assets/480x480-amazfit-t-rex-3-pro/fonts/ChakraPetch-Medium.ttf') format('truetype');
@@ -21,8 +21,8 @@
 <body>
 <div id="cell"><div id="strip"></div><div id="seam"></div></div>
 <script>
-// Ein Einzelbild der Klappbewegung von Ziffer `from` auf `from + 1`.
-// f = 0 zeigt die Ausgangsziffer, f = frames - 1 die fertige Zielziffer.
+// A single frame of the flap movement from digit `from` to `from + 1`.
+// f = 0 shows the starting digit, f = frames - 1 the finished target digit.
 function q(name, fallback) {
   var m = location.search.match(new RegExp('[?&]' + name + '=([^&]*)'));
   return m ? decodeURIComponent(m[1]) : fallback;

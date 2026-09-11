@@ -25,10 +25,10 @@ const USE_FLAP = false
 // plays 9->0, 0->1, 1->2 back to back, so the digit flaps through every value.
 // Every cell size needs its own frames - an IMG_ANIM has exactly one pixel
 // size - and the small ones get by with fewer steps.
-// Jede Ziffer besteht aus zwei Widgets: einem Standbild, das dauerhaft steht,
-// und einer IMG_ANIM darueber, die nur waehrend des Rollens sichtbar ist. Eine
-// IMG_ANIM zeichnet naemlich nur, solange sie laeuft - steht sie, bleibt die
-// Zelle leer.
+// Every digit is two widgets: a still image that is always there, and an
+// IMG_ANIM on top of it that is only visible while the digit rolls. An
+// IMG_ANIM only draws while it is running - once it stops, the cell goes
+// blank.
 const FLAP = {
   big: { path: 'image/flap/big', still: 'image/digit/big', frames: 6 },
   sec: { path: 'image/flap/sec', still: 'image/digit/sec', frames: 4 },
@@ -38,16 +38,16 @@ const FLAP = {
 // instead of flicking past.
 const FLAP_FPS = 20
 
-// Chakra Petch Medium, mitgeliefert unter assets/<target>/fonts/ (OFL).
-// Ziffernbreite gemessen: 50.9 px bei 80 px, 14.0 px bei 22 px - die
-// Zellenbreiten unten stammen genau daher.
+// Chakra Petch Medium, shipped under assets/<target>/fonts/ (OFL).
+// Measured digit width: 50.9 px at 80 px, 14.0 px at 22 px - the cell widths
+// below come straight from that.
 const FONT = 'fonts/ChakraPetch-Medium.ttf'
 
 const RAIN_FRAMES = 24
-// Tempo des Regens: Spalten wandern 1-3 Glyphenzeilen pro Frame, die
-// Bildrate bestimmt also alles. 6 fps = 4 s pro Schleife. Das ist zugleich der
-// wirksamste Performance-Hebel: jedes Frame ist ein 480x480-PNG, das aus dem
-// Flash dekodiert wird. Weniger Bilder pro Sekunde heisst direkt weniger Last.
+// Rain speed: columns travel 1-3 glyph rows per frame, so the frame rate is
+// all there is to it. 6 fps = 4 s per loop. It is also the most effective
+// performance knob: every frame is a 480x480 PNG decoded out of flash, so
+// fewer frames per second means directly less load.
 const RAIN_FPS = 6
 
 // The design's accent green, pre-blended over black at the opacities used
@@ -97,9 +97,9 @@ let battery = null
 let tickTimer = null
 let cursorOn = true
 
-// Schritte koennen im Gehen mehrmals pro Sekunde eintreffen. Die Rueckrufe
-// merken sich nur, dass etwas offen ist; geschrieben wird hoechstens einmal
-// pro Sekunde im Takt. Sonst zeichnet das System bei jedem Schritt neu.
+// While walking, steps can arrive several times per second. The callbacks
+// only record that something is pending; the write happens at most once per
+// second on the tick. Otherwise the system redraws on every single step.
 const pending = { steps: false, heart: false, power: false }
 
 // ---------------------------------------------------------------- helpers
@@ -216,7 +216,7 @@ function setDigits(name, text) {
     const slot = group[i]
 
     if (USE_FLAP) {
-      // Beim ersten Zeichnen nur das Standbild setzen, nicht rollen.
+      // On the first paint just set the still image, do not roll.
       if (!slot.painted) {
         slot.value = digit
         slot.painted = true
@@ -263,7 +263,7 @@ function setNumber(name, value) {
   }
 }
 
-// Standbild auf den aktuellen Wert setzen.
+// Point the still image at the current value.
 function setStill(slot) {
   slot.still.src = slot.flap.still + '/' + slot.value + '.png'
   slot.widget.setProperty(ui.prop.MORE, slot.still)
@@ -285,7 +285,7 @@ function rollTo(slot, target) {
 function playStep(slot) {
   const from = slot.queue.shift()
   if (from === undefined) {
-    // Fertig gerollt: Standbild auf den Zielwert, Animation wieder verstecken.
+    // Done rolling: still image to the target value, hide the animation again.
     setStill(slot)
     slot.widget.setProperty(ui.prop.VISIBLE, true)
     slot.anim.setProperty(ui.prop.VISIBLE, false)
@@ -471,9 +471,9 @@ function wireSensors() {
   battery.onChange(safe('battery', function () { pending.power = true }))
 }
 
-// Offene Sensorwerte nachziehen, gebuendelt. Laeuft nur, solange der Bildschirm
-// an ist - bei ausgeschaltetem Display waere das Zeichnen ohnehin unsichtbar,
-// und beim Aufwachen holt refreshAll alles nach.
+// Flush pending sensor values in one go. Only runs while the screen is on -
+// with the display off the drawing would be invisible anyway, and refreshAll
+// catches everything up on wake.
 function flushPending() {
   if (pending.steps) {
     pending.steps = false
@@ -496,10 +496,10 @@ function dateText() {
   return WEEKDAYS[time.getDay() - 1] + ' ' + pad(time.getDate()) + ' ' + MONTHS[time.getMonth() - 1]
 }
 
-// Am Minutenwechsel so wenig wie moeglich schreiben: jeder setProperty-Aufruf
-// zwingt das System zum Neuzeichnen, und darunter laeuft der Vollbild-Regen.
-// Deshalb hier nur, was im sichtbaren Zifferblatt wirklich anders wird.
-// Der Akku hat einen eigenen onChange-Listener und gehoert nicht hierher.
+// Write as little as possible on the minute change: every setProperty call
+// forces the system to redraw, and the full-screen rain runs underneath. So
+// only touch what actually changes on the visible face here. The battery has
+// its own onChange listener and does not belong here.
 function updateMinute() {
   if (isAod()) {
     updateAod()
@@ -511,9 +511,9 @@ function updateMinute() {
   setText('date', widgets.date, dateText())
 }
 
-// Die Always-On-Widgets sind im Normalbetrieb unsichtbar. Sie werden beim
-// Abschalten des Displays einmal nachgezogen und danach im Minutentakt, statt
-// jede Minute im laufenden Betrieb mitgeschrieben zu werden.
+// The always-on widgets are invisible during normal operation. They are
+// caught up once when the display switches off and then once a minute, instead
+// of being written along every minute while the face is active.
 function updateAod() {
   setText('aodTime', widgets.aodTime, pad(time.getHours()) + ':' + pad(time.getMinutes()))
   setText('aodDate', widgets.aodDate, dateText())

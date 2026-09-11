@@ -1,26 +1,26 @@
-# Entwickler-Dokumentation
+# Developer documentation
 
-Technische Seite des Matrix Watchface Red. Die Anwender- und Installationsseite
-steht in [README.md](README.md).
+The technical side of Matrix Watchface Red. The user-facing and installation side
+is in [README.md](README.md).
 
-## Gerät und Ziel
+## Device and target
 
 | | |
 | --- | --- |
-| Gerät | Amazfit T-Rex 3 Pro 48mm |
-| Display | 480 × 480, rund, AMOLED |
+| Device | Amazfit T-Rex 3 Pro 48mm |
+| Display | 480 × 480, round, AMOLED |
 | `deviceSource` | 10551552 (CN), 10551553, 10551555 |
-| `configVersion` | v2 (v2 und v3 sind gültig, v1 ist abgekündigt) |
-| API-Level | 4.2 |
-| Target-Key | `480x480-amazfit-t-rex-3-pro` |
+| `configVersion` | v2 (v2 and v3 are valid, v1 is deprecated) |
+| API level | 4.2 |
+| Target key | `480x480-amazfit-t-rex-3-pro` |
 | `designWidth` | 480 |
 
 ## API
 
-Das Gerät läuft auf API-Level 4.2. Die klassischen Globals (`hmUI`,
-`hmSensor`, `hmSetting`, `timer`) **existieren dort nicht mehr** — jeder
-Zugriff darauf endet in `TypeError: cannot read property … of undefined` und
-einem schwarzen Bildschirm. Alles kommt aus den `@zos`-Modulen:
+The device runs API level 4.2. The classic globals (`hmUI`, `hmSensor`,
+`hmSetting`, `timer`) **no longer exist** there — touching any of them ends in
+`TypeError: cannot read property … of undefined` and a black screen. Everything
+comes from the `@zos` modules:
 
 ```js
 import ui from '@zos/ui'
@@ -28,360 +28,355 @@ import { getScene, SCENE_AOD } from '@zos/app'
 import { Time, Step, HeartRate, Battery } from '@zos/sensor'
 ```
 
-`WatchFace({ … })`, `console.log`, `setInterval` und `clearInterval` bleiben
-global. **Nicht** `createSysTimer` aus `@zos/timer` für den Sekundentakt
-nehmen: der ist dafür gedacht, den ausgeschalteten Bildschirm zu überleben,
-und die Firmware weist so kurze Perioden ab (`_check_param … bad repeat(1000)`
-im Log, der Timer läuft dann einfach nicht).
+`WatchFace({ … })`, `console.log`, `setInterval` and `clearInterval` stay
+global. Do **not** use `createSysTimer` from `@zos/timer` for the one-second
+tick: it is meant to survive a switched-off screen, and the firmware rejects
+periods that short (`_check_param … bad repeat(1000)` in the log, and the timer
+simply never runs).
 
-Die Sensoren brauchen Permissions in `app.json`, sonst schlägt der Zugriff
-fehl: `data:user.hd.step` und `data:user.hd.heart_rate`. Time und Battery
-brauchen keine.
+The sensors need permissions in `app.json` or access fails:
+`data:user.hd.step` and `data:user.hd.heart_rate`. Time and Battery need none.
 
-## Projektstruktur
+## Project layout
 
 ```
-app.json                    Manifest, Target und deviceSource
-app.js                      App-Einstiegspunkt (unverändert aus dem Template)
-watchface/index.js          das komplette Watchface
+app.json                    manifest, target and deviceSource
+app.js                      app entry point (unchanged from the template)
+watchface/index.js          the entire watchface
 assets/480x480-amazfit-t-rex-3-pro/
-  icon.png                  Vorschaubild, 480 x 480
+  icon.png                  preview image, 480 x 480
   fonts/                    Chakra Petch Medium + OFL.txt
-  image/rain/               Frames des Matrix-Regens
-  image/flap/big/           Klapp-Frames der großen Ziffern (noch leer)
-  image/flap/small/         Klapp-Frames der kleinen Ziffern (noch leer)
-design/                     Quelle des Design-Canvas (*.dc.html)
-design/frames/              Frame-Generator für den Regen
-design/shots/               eigenständige HTML-Seiten für die Screenshots
-docs/screenshots/           die Bilder im README
+  image/rain/               Matrix rain frames
+  image/flap/big/           split-flap frames of the large digits
+  image/flap/sec/           split-flap frames of the seconds digits
+  image/flap/sml/           split-flap frames of the small digits
+  image/digit/              still images of the digits
+design/                     design canvas source (*.dc.html)
+design/frames/              frame generator for the rain
+design/shots/               standalone HTML pages for the screenshots
+docs/screenshots/           the images used in the README
 ```
 
-Das entspricht der offiziellen
-[Folder Structure](https://docs.zepp.com/docs/v2/guides/architecture/folder-structure/):
-`app.js` und `app.json` an der Wurzel, darunter ein Ordner je Target unter
-`assets/`, benannt **exakt wie der Schlüssel im `targets`-Objekt**, mit
-`icon.png` und Bildern unter `image/`.
+This matches the official
+[folder structure](https://docs.zepp.com/docs/v2/guides/architecture/folder-structure/):
+`app.js` and `app.json` at the root, below that one folder per target under
+`assets/`, named **exactly like the key in the `targets` object**, containing
+`icon.png` and images under `image/`.
 
-`design/` und `docs/` liegen zwar im Projekt, landen aber nicht im Paket — beim
-Install legt die Firmware nur `watchface/` und `assets/` an. Sie lösen
-allerdings Rebuilds aus, solange `zeus dev` läuft.
+`design/` and `docs/` live in the project but never end up in the package — on
+install the firmware only creates `watchface/` and `assets/`. They do trigger
+rebuilds while `zeus dev` is running, though.
 
-## Vorschaubild
+## Preview image
 
-`icon.png` ist das Bild, das in der Zifferblatt-Auswahl auf der Uhr erscheint.
-Der Build skaliert es auf 324 px (`[RESIZE] Succeed resize icon.png to target
-size 324` im Log) — das ist die Größe, die die Spezifikation für ein
-480 × 480-Gerät verlangt. Es kommt mit dem Paket, nicht erst beim
-Veröffentlichen.
+`icon.png` is the image shown in the watchface picker on the watch. The build
+scales it down to 324 px (`[RESIZE] Succeed resize icon.png to target size 324`
+in the log), which is the size the specification requires for a 480 × 480
+device. It ships with the package, not only at publishing time.
 
-Erzeugt aus dem Entwurf:
+Generated from the design draft:
 
 ```bash
-msedge --headless=new --window-size=480,480   --screenshot=assets/480x480-amazfit-t-rex-3-pro/icon.png   "file:///<pfad>/design/shots/active.html?icon=1"
+msedge --headless=new --window-size=480,480   --screenshot=assets/480x480-amazfit-t-rex-3-pro/icon.png   "file:///<path>/design/shots/active.html?icon=1"
 ```
 
-`?icon=1` lässt den Gehäusering weg, damit exakt das 480 × 480-Panel im Bild
-ist.
+`?icon=1` drops the bezel ring so the image contains exactly the 480 × 480
+panel.
 
-## Schrift
+## Typeface
 
-Chakra Petch Medium, mitgeliefert als
-`assets/<target>/fonts/ChakraPetch-Medium.ttf` und an jedem `TEXT`-Widget über
-`font: FONT` gesetzt. Das TEXT-Widget nimmt laut
-[UI-Referenz](https://docs.zepp.com/docs/reference/device-app-api/newAPI/ui/)
-einen Pfad relativ zum Asset-Ordner — Bild-Ziffern sind dafür nicht nötig.
+Chakra Petch Medium, shipped as
+`assets/<target>/fonts/ChakraPetch-Medium.ttf` and set on every `TEXT` widget
+via `font: FONT`. According to the
+[UI reference](https://docs.zepp.com/docs/reference/device-app-api/newAPI/ui/)
+the TEXT widget takes a path relative to the asset folder — image digits are
+not needed for this.
 
-Die Lizenz (SIL Open Font License) liegt als `OFL.txt` daneben; sie erlaubt
-das Mitliefern, verlangt aber, dass sie mitgeht. Nicht löschen.
+The licence (SIL Open Font License) sits next to it as `OFL.txt`; it permits
+bundling but requires the licence to travel with the font. Do not delete it.
 
-Die Zellenbreiten unten stammen aus der gemessenen Ziffernbreite dieser
-Schrift: **50,9 px bei 80 px** Schriftgröße und **14,0 px bei 22 px**. Wer die
-Schrift tauscht, muss neu messen — sonst stehen die Ziffern schief in ihren
-Zellen oder werden abgeschnitten.
+The cell widths below come from the measured digit width of this font:
+**50.9 px at 80 px** font size and **14.0 px at 22 px**. Swapping the font means
+measuring again — otherwise the digits sit crooked in their cells or get
+clipped.
 
 ## Layout (480 × 480)
 
 | Element | Position |
 | --- | --- |
-| `> SYS.TIME` | y 150, zentriert, 22 px |
-| Uhrzeit HH:MM | 4 Zellen à 51 × 76 + 20 px Doppelpunkt, Block ab x 128, auf y 240 zentriert |
-| Sekunden | 2 Zellen à 18 × 30 ab x 364 |
-| Cursor | 10 × 26 bei x 408 |
-| Trennlinie | x 110, y 296, 260 × 1 |
-| Datenzeilen | Label x 137, Wert x 233, Ziffernzelle 14 px, ab y 308, Abstand 32 |
+| `> SYS.TIME` | y 150, centred, 22 px |
+| Time HH:MM | 4 cells of 51 × 76 + 20 px colon, block starting at x 128, centred on y 240 |
+| Seconds | 2 cells of 18 × 30 starting at x 364 |
+| Cursor | 10 × 26 at x 408 |
+| Separator line | x 110, y 296, 260 × 1 |
+| Data rows | label x 137, value x 233, digit cell 14 px, from y 308, pitch 32 |
 
-Oben und unten bleiben 44 px frei — dort zeichnet das System den Statuspunkt
-und den Offline-Voice-Hinweis. Mindestschriftgröße auf dem Zifferblatt sind
-22 px, deshalb sind die Datenzeilen genau so groß.
+The top and bottom 44 px stay free — that is where the system draws the status
+dot and the offline voice hint. Minimum font size on a watchface is 22 px,
+which is exactly why the data rows are that size.
 
-## Aufbau des Codes
+## Code structure
 
-`watchface/index.js` ist in Abschnitte gegliedert: Einstellungen, Farben,
-Layout, Zustand, Hilfsfunktionen, Ziffern-Slots, Aufbau, Aktualisierung,
-Einstieg.
+`watchface/index.js` is split into sections: settings, colours, layout, state,
+helpers, digit slots, build, update, entry point.
 
-**Slots.** Jede Ziffer auf dem Zifferblatt ist ein Slot. Ohne Bild-Assets ist
-das ein `TEXT`-Widget, mit Assets ein `IMG_ANIM`. `setDigits()` schaltet
-zwischen beiden Wegen um.
+**Slots.** Every digit on the watchface is a slot. Without image assets that is
+a `TEXT` widget, with assets an `IMG_ANIM`. `setDigits()` switches between the
+two paths.
 
-`setNumber()` setzt Werte wechselnder Länge **linksbündig** an die Wertespalte
-`ROW.valueX` — wie das Datum, damit alle vier Zeilen bündig stehen. Nicht
-gebrauchte Slots am Ende werden ausgeblendet, und die Einheit dahinter (`BPM`,
-`%`) rückt nach: sie behält ihr Options-Objekt, damit
-`setProperty(ui.prop.MORE, options)` sie mit neuem `x` neu setzen kann.
+`setNumber()` places values of varying length **left-aligned** against the value
+column `ROW.valueX` — like the date, so all four rows line up. Unused slots at
+the end are hidden and the unit behind them (`BPM`, `%`) moves up: it keeps its
+options object so `setProperty(ui.prop.MORE, options)` can re-set it with a new
+`x`.
 
-**Klapp-Logik.** `rollTo()` legt pro Zwischenschritt einen Eintrag in die
-Queue, `playStep()` spielt sie über `anim_complete_call` nacheinander ab. So
-läuft die Walze immer vorwärts, auch über den Nullpunkt.
+**Flap logic.** `rollTo()` pushes one entry per intermediate step onto the queue
+and `playStep()` plays them back to back via `anim_complete_call`. That way the
+reel always rolls forward, including across zero.
 
-**Zwei Sätze Widgets.** `buildActive()` und `buildAod()` erzeugen die aktive
-und die Always-On-Anzeige, getrennt über `show_level: ONLY_NORMAL` bzw.
-`ONAL_AOD`. Die Uhrzeit steht in beiden an derselben Stelle und in derselben
-Größe, damit beim Umschalten nichts springt.
+**Two sets of widgets.** `buildActive()` and `buildAod()` create the active and
+the always-on face, separated by `show_level: ONLY_NORMAL` and `ONAL_AOD`
+respectively. The time sits at the same position and size in both so nothing
+jumps when switching.
 
-## Aktualisierung
+## Update strategy
 
-Die Anzeige wird ereignisgesteuert aktualisiert, nicht im Sekundentakt
-durchgerechnet:
+The display is updated event-driven rather than recomputed every second:
 
-| Auslöser | Was aktualisiert wird |
+| Trigger | What it updates |
 | --- | --- |
-| `time.onPerMinute` | Stunde, Minute, Datum, Akku, komplette Always-On-Anzeige |
-| `step.onChange` | Schrittzahl |
-| `heart.onLastChange` | Puls |
-| `battery.onChange` | Akkustand |
-| `setInterval(…, 1000)` | Sekunden und Cursor |
+| `time.onPerMinute` | hour, minute, date, battery, the whole always-on face |
+| `step.onChange` | step count |
+| `heart.onLastChange` | heart rate |
+| `battery.onChange` | battery level |
+| `setInterval(…, 1000)` | seconds and cursor |
 
-Der Timer läuft nur bei eingeschaltetem Display — `WIDGET_DELEGATE` startet und
-stoppt ihn über `resume_call` / `pause_call`, und im Always-On-Modus
-(`getScene() === SCENE_AOD`) wird erst gar keiner angelegt. Die
-Always-On-Anzeige bleibt trotzdem aktuell, weil das System das Zifferblatt für
-`onPerMinute` weckt.
+The timer only runs while the display is on — `WIDGET_DELEGATE` starts and stops
+it via `resume_call` / `pause_call`, and in always-on mode
+(`getScene() === SCENE_AOD`) none is created in the first place. The always-on
+face still stays current because the system wakes the watchface for
+`onPerMinute`.
 
-Zusätzlich schreibt `setText()` nur dann in ein Widget, wenn sich der Wert
-wirklich geändert hat, und `setDigits()` überspringt Ziffern, die schon
-stimmen. Pro Sekunde bleiben damit im Normalfall zwei Schreibzugriffe übrig:
-die Sekundenziffer und der Cursor.
+On top of that, `setText()` only writes to a widget when the value really
+changed, and `setDigits()` skips digits that are already correct. In the normal
+case that leaves two writes per second: the seconds digit and the cursor.
 
-## Feature-Flags
+## Feature flags
 
-Ganz oben in `watchface/index.js`:
+Right at the top of `watchface/index.js`:
 
 ```js
-const USE_RAIN = true    // Matrix-Regen als Vollbild-Animation
-const USE_FLAP = false   // Klapp-Ziffern statt einfacher Textziffern
+const USE_RAIN = true    // Matrix rain as a full-screen animation
+const USE_FLAP = false   // split-flap digits instead of plain text digits
 ```
 
-Beide brauchen die Bildfolgen unten. Stehen sie auf `false`, läuft dasselbe
-Zifferblatt ohne Regen und mit hart wechselnden Textziffern.
+Both need the frame sequences described below. Set to `false`, the same
+watchface runs without rain and with hard-switching text digits.
 
-`USE_FLAP` steht bewusst auf `false`. Mit Textziffern läuft das Zifferblatt
-zuverlässig, der Klapp-Effekt ist der Teil, der noch auf echter Hardware
-bestätigt werden muss.
+`USE_FLAP` is deliberately `false`. With text digits the watchface runs
+reliably; the split-flap effect is the part that still has to be confirmed on
+real hardware.
 
-> **Warum das so ist.** Eine `IMG_ANIM` zeichnet nur, solange sie läuft. Steht
-> sie, bleibt die Zelle leer, und im Log steht trotzdem überall `ok`. Deshalb
-> verschwand die Uhrzeit komplett, als der Klapp-Effekt zum ersten Mal aktiv
-> war. Sichtbar wurde das an einer Salve von `_pause`-Meldungen direkt nach
-> `[matrix] clock ok`: das System pausiert jede nicht laufende Animation.
+> **Why this is the way it is.** An `IMG_ANIM` only draws while it is running.
+> When it stops, the cell stays empty — and the log still reports `ok`
+> everywhere. That is why the time disappeared entirely the first time the flap
+> effect was enabled. The giveaway was a burst of `_pause` messages right after
+> `[matrix] clock ok`: the system pauses every animation that is not running.
 >
-> Behoben ist es, indem jede Ziffer aus **zwei** Widgets besteht: einem
-> `IMG`-Standbild aus `image/digit/<größe>/<ziffer>.png`, das dauerhaft steht,
-> und der `IMG_ANIM` darüber, die nur während des Rollens eingeblendet wird.
-> `playStep` setzt am Ende der Kette das Standbild auf den Zielwert und
-> versteckt die Animation wieder.
+> The fix is to build each digit from **two** widgets: an `IMG` still image from
+> `image/digit/<size>/<digit>.png` that is always there, and the `IMG_ANIM` on
+> top which is only shown while rolling. At the end of the chain `playStep` sets
+> the still image to the target value and hides the animation again.
 >
-> Zum Testen `USE_FLAP` auf `true` setzen. Dafür müssen alle 140 Frames liegen
-> (60 in `big`, 40 in `sec`, 40 in `sml`) und die 30 Standbilder unter
-> `image/digit/`. Fehlt etwas davon, bleibt die betroffene Ziffer leer.
+> To test, set `USE_FLAP` to `true`. That requires all 140 frames to be present
+> (60 in `big`, 40 in `sec`, 40 in `sml`) plus the 30 still images under
+> `image/digit/`. If any of them is missing, the affected digit stays blank.
 
 ## Frames
 
-Alles unter `assets/480x480-amazfit-t-rex-3-pro/`:
+Everything under `assets/480x480-amazfit-t-rex-3-pro/`:
 
-| Ordner | Dateien | Größe | Stand |
+| Folder | Files | Size | State |
 | --- | --- | --- | --- |
-| `rain/` | `rain_0.png` … `rain_23.png` | 480 × 480 | **fertig, 2,4 MB** |
-| `flap/big/` | `roll_<n>_<f>.png`, n = 0…9, f = 0…5 | 51 × 76 | **fertig** |
-| `flap/sec/` | `roll_<n>_<f>.png`, n = 0…9, f = 0…3 | 18 × 30 | **fertig** |
-| `flap/sml/` | `roll_<n>_<f>.png`, n = 0…9, f = 0…3 | 14 × 26 | **fertig** |
+| `rain/` | `rain_0.png` … `rain_23.png` | 480 × 480 | **done, 2.4 MB** |
+| `flap/big/` | `roll_<n>_<f>.png`, n = 0…9, f = 0…5 | 51 × 76 | **done** |
+| `flap/sec/` | `roll_<n>_<f>.png`, n = 0…9, f = 0…3 | 18 × 30 | **done** |
+| `flap/sml/` | `roll_<n>_<f>.png`, n = 0…9, f = 0…3 | 14 × 26 | **done** |
 
-Der Dateiname ist `<anim_prefix>_<index>.png` — bestätigt am offiziellen
-Sample (`anim_prefix: 'a'` → `a_0.png`).
+The file name is `<anim_prefix>_<index>.png` — confirmed against the official
+sample (`anim_prefix: 'a'` gives `a_0.png`).
 
-### Klapp-Ziffern
+### Split-flap digits
 
-**Jede Zellengröße braucht eigene Frames.** Eine `IMG_ANIM` hat genau eine
-Pixelgröße, deshalb gibt es drei Sätze: `big` für Stunde und Minute, `sec` für
-die Sekunden, `sml` für Schritte, Puls und Akku. Früher zeigten Sekunden und
-Datenwerte auf denselben Ordner, was nicht funktionieren kann.
+**Every cell size needs its own frames.** An `IMG_ANIM` has exactly one pixel
+size, hence three sets: `big` for hour and minute, `sec` for the seconds, `sml`
+for steps, heart rate and battery. An earlier version pointed seconds and data
+values at the same folder, which cannot work.
 
-Erzeugt aus `design/frames/flap.html`, ein Aufruf pro Frame:
-
-```bash
-msedge --headless=new --window-size=51,76   --screenshot=.../image/flap/big/roll_9_3.png   "file:///<pfad>/design/frames/flap.html?size=big&from=9&f=3&c=c9ffd9&g=0,255,65"
-```
-
-`size` wählt die Zellengröße, `from` die Ausgangsziffer, `f` das Einzelbild,
-`c` die Ziffernfarbe und `g` die Glühfarbe als RGB-Tripel. Die rote Variante
-benutzt dieselbe Seite mit anderen Farbwerten.
-
-Das Tempo steckt in `FLAP_FPS` (aktuell 20). Bei sechs Frames dauert ein
-Ziffernschritt damit 300 ms; ein Sprung von 9 auf 2 klappt dreimal
-hintereinander, also knapp eine Sekunde. Höher heißt schneller und irgendwann
-unsichtbar.
-
-### Regen
-
-Erzeugt aus `design/frames/rain.html?f=<0…23>`, ein Aufruf pro Frame:
+Generated from `design/frames/flap.html`, one call per frame:
 
 ```bash
-msedge --headless=new --window-size=480,480   --screenshot=assets/480x480-amazfit-t-rex-3-pro/rain/rain_0.png   "file:///<pfad>/design/frames/rain.html?f=0"
+msedge --headless=new --window-size=51,76   --screenshot=.../image/flap/big/roll_9_3.png   "file:///<path>/design/frames/flap.html?size=big&from=9&f=3&c=ffd9d9&g=255,45,45"
 ```
 
-Das Tempo steckt allein in `RAIN_FPS` (aktuell 8, also 3 s pro Schleife) — die
-Spalten wandern pro Frame um ganze Glyphenzeilen, die Bildrate skaliert also
-den ganzen Regen. Niedriger heißt langsamer und zugleich weniger Rechenlast;
-neu rendern muss man dafür nichts.
+`size` picks the cell size, `from` the starting digit, `f` the single frame, `c`
+the digit colour and `g` the glow colour as an RGB triple. The green variant
+uses the same page with different colour values.
 
-Die Schleife schließt nahtlos, weil jede Spalte pro Frame um ganze
-Glyphenzeilen wandert (1, 2 oder 3) und die Strähne sich alle `PERIOD = 24`
-Zeilen wiederholt — nach 24 Frames ist jede Spalte um ein ganzes Vielfaches
-der Periode gewandert. `PERIOD` muss deshalb `FRAMES` teilen. Jede Spalte hat
-zusätzlich eine feste Phase, sonst stehen alle Strähnen auf derselben Höhe.
+The speed lives in `FLAP_FPS` (currently 20). With six frames a digit step takes
+300 ms; a jump from 9 to 2 flaps three times in a row, so just under a second.
+Higher means faster and at some point invisible.
 
-In die Frames sind Scrim, Scanlines und Vignette eingebacken — sie kosten nur
-rund 8 % Dateigröße und sparen ein zweites Overlay-Widget. Weniger Frames
-halbieren die 2,4 MB, dann muss `PERIOD` aber mitgezogen werden.
+`roll_3` is the step **from 3 to 4**. The last frame of every sequence has to be
+the finished target digit, because it stays on screen until the next change. The
+background is always pure black.
 
-`roll_3` ist der Schritt **von 3 auf 4**. Das letzte Frame jeder Sequenz muss
-die fertige Zielziffer sein, weil es bis zum nächsten Wechsel stehen bleibt.
-Der Hintergrund ist immer reines Schwarz.
+The reference for the look is `design/shots/active.html` — cell size, font,
+afterglow and the flap edge are already set there the way the frames should
+look.
 
-Vorlage für das Aussehen ist `design/shots/active.html` — dort sind Zellgröße,
-Schrift, Nachleuchten und die Klappkante schon so gesetzt, wie die Frames
-aussehen sollen.
+### Rain
+
+Generated from `design/frames/rain.html?f=<0…23>`, one call per frame:
+
+```bash
+msedge --headless=new --window-size=480,480   --screenshot=assets/480x480-amazfit-t-rex-3-pro/rain/rain_0.png   "file:///<path>/design/frames/rain.html?f=0"
+```
+
+The speed lives entirely in `RAIN_FPS` (currently 6, i.e. 4 s per loop) — the
+columns travel whole glyph rows per frame, so the frame rate scales the whole
+rain. Lower means slower and at the same time less load; nothing has to be
+re-rendered for it.
+
+The loop closes seamlessly because every column travels whole glyph rows per
+frame (1, 2 or 3) and the strand repeats every `PERIOD = 24` rows — after 24
+frames every column has travelled a whole multiple of the period. `PERIOD`
+therefore has to divide `FRAMES`. Every column additionally has a fixed phase,
+otherwise all strands would sit at the same height.
+
+Scrim, scanlines and vignette are baked into the frames — they only cost around
+8 % file size and save a second overlay widget. Fewer frames would halve the
+2.4 MB, but `PERIOD` has to follow.
 
 ## Build
 
 ```
-zeus dev      # Simulator mit Live-Reload
-zeus preview  # QR-Code, Installation aufs Gerät
-zeus build    # .zab-Paket nach dist/
+zeus dev      # simulator with live reload
+zeus preview  # QR code, install onto the device
+zeus build    # .zab package into dist/
 ```
 
-Während `zeus dev` läuft, löst **jede** Dateiänderung im Projektordner einen
-Rebuild aus — auch in `design/` und `docs/`. Bei vielen Schreibvorgängen
-hintereinander verliert der Watcher die Verbindung zum Simulator und beendet
-sich mit Code 1.
+While `zeus dev` is running, **every** file change in the project folder
+triggers a rebuild — including in `design/` and `docs/`. With many writes in a
+row the watcher loses the connection to the simulator and exits with code 1.
 
-## Screenshots neu erzeugen
+## Regenerating the screenshots
 
-Die Bilder im README kommen nicht vom Gerät, sondern aus eigenständigen
-HTML-Seiten unter `design/shots/`, gerendert mit einem headless Chromium:
+The images in the README do not come from the device but from standalone HTML
+pages under `design/shots/`, rendered with a headless Chromium:
 
 ```bash
 msedge --headless=new --window-size=520,520 \
   --screenshot=docs/screenshots/active.png \
-  file:///<pfad>/design/shots/active.html
+  file:///<path>/design/shots/active.html
 ```
 
-`active.html?flap=1` zeigt die Minutenziffer mitten im Klappvorgang,
-`aod.html` die Always-On-Anzeige. Werte und Uhrzeit sind die Beispieldaten aus
-der Zepp-OS-Spezifikation für Vorschaubilder: 10:09:36, 8670 Schritte, 86 bpm.
+`active.html?flap=1` shows the minute digit mid-flap, `aod.html` the always-on
+face. Values and time are the sample data from the Zepp OS specification for
+preview images: 10:09:36, 8670 steps, 86 bpm.
 
-## Stromverbrauch
+## Power consumption
 
-Schwarzer Grund und eine einzige rote Farbe sind auf AMOLED der günstigste
-Fall — nur leuchtende Pixel ziehen Strom. Teuer ist der Vollbild-Regen: Zepp OS
-zeichnet nicht frei, sondern spielt vorgerenderte PNG-Sequenzen ab, und ein
-480 × 480-Loop ist das Aufwendigste, was auf das Zifferblatt passt.
+A black background and a single red colour are the cheapest case on AMOLED —
+only lit pixels draw power. The expensive part is the full-screen rain: Zepp OS
+does not draw freely but plays back pre-rendered PNG sequences, and a 480 × 480
+loop is the heaviest thing that fits on a watchface.
 
-Stellschrauben, alle an `IMG_ANIM`:
+The knobs, all on `IMG_ANIM`:
 
-- `repeat_count: 1` statt `0` — der Regen läuft einmal beim Handheben statt
-  dauerhaft
-- `default_frame_index` — das Bild, das im Stromsparmodus stehen bleibt
-- `step` — Frames überspringen
-- kleinere animierte Fläche statt Vollbild
+- `repeat_count: 1` instead of `0` — the rain runs once on wrist raise instead
+  of continuously
+- `default_frame_index` — the image left on screen in power-saving mode
+- `step` — skip frames
+- a smaller animated area instead of full screen
 
-Für den Always-On-Modus schreibt die Zepp-OS-Spezifikation vor: höchstens 10 %
-leuchtende Pixel, schwarzer Grund, keine Sekundenanzeige, helle Flächen als
-Kontur mit maximal 6 px Strichstärke, und Elemente dürfen zwischen den Modi
-nicht springen. `buildAod()` hält sich an alle Punkte.
+For always-on mode the Zepp OS specification requires: at most 10 % lit pixels,
+a black background, no seconds display, bright areas as outlines with at most
+6 px stroke width, and elements must not jump between the modes. `buildAod()`
+follows all of these.
 
-## Offene Prüfpunkte
+## Open questions
 
-Geklärt und auf dem Gerät bestätigt: die Globals sind weg, alles läuft über
-`@zos`. Diese Stellen stammen weiter aus Doku bzw. offiziellen Samples und
-sind noch nicht gegen Hardware belegt:
+Clarified and confirmed on the device: the globals are gone, everything goes
+through `@zos`. The following still come from documentation or official samples
+and are not yet backed by hardware:
 
-- **Farbformat.** `@zos/ui` bekommt Farben als einfache Zahl (`0xff2d2d`), so
-  wie es die API-Referenz und das 3.0-Sample zeigen. Ältere, mit dem Watchface
-  Maker erzeugte Samples schreiben stattdessen `"0xAARRGGBB"` als String. Falls
-  Text unsichtbar bleibt, obwohl im Log alles `ok` meldet, ist das der erste
-  Verdacht.
-- `ui.widget.WIDGET_DELEGATE` mit `resume_call` / `pause_call` — im
-  3.0-Sample nicht mehr enthalten, dort wird gar nicht pausiert. Schlägt es
-  fehl, meldet sich `[matrix] delegate FAILED` und der Timer läuft weiter.
-- Nachladen einer `IMG_ANIM` über `setProperty(ui.prop.MORE, …)`, um die
-  Klapp-Schritte zu verketten.
-- `time.getDay()` wird als 1 = Montag … 7 = Sonntag angenommen.
+- **Colour format.** `@zos/ui` takes colours as a plain number (`0xff2d2d`), the
+  way the API reference and the 3.0 sample show it. Older samples generated with
+  the Watchface Maker write `"0xAARRGGBB"` as a string instead. If text stays
+  invisible even though the log reports `ok` everywhere, that is the first
+  suspect.
+- `ui.widget.WIDGET_DELEGATE` with `resume_call` / `pause_call` — no longer part
+  of the 3.0 sample, which does not pause at all. If it fails,
+  `[matrix] delegate FAILED` shows up and the timer keeps running.
+- Reloading an `IMG_ANIM` via `setProperty(ui.prop.MORE, …)` to chain the flap
+  steps.
+- `time.getDay()` is assumed to be 1 = Monday … 7 = Sunday.
 
-## Veröffentlichen
+## Publishing
 
-Ablauf laut [Watchface einreichen](https://docs.zepp.com/docs/distribute/watchface/)
-und [Spezifikation](https://docs.zepp.com/docs/watchface/specification/):
+The process according to
+[submitting a watchface](https://docs.zepp.com/docs/distribute/watchface/) and
+the [specification](https://docs.zepp.com/docs/watchface/specification/):
 
-1. Auf [console.zepp.com](https://console.zepp.com/) mit dem Zepp-Konto
-   anmelden.
-2. **App anlegen** und damit eine echte `appId` erhalten. Sie wird bei der
-   Registrierung automatisch vergeben und muss in `app.json` eingetragen
-   werden. Die `appId` im Paket **muss** mit der bei der Veröffentlichung
-   angegebenen übereinstimmen.
-3. `zeus build` erzeugt das `.zab`-Paket in `dist/`.
-4. In der Konsole unter **Application Services → Watchface** das Paket
-   hochladen. Die unterstützten Geräte erkennt die Konsole selbst aus dem
-   Paket.
-5. Ausfüllen: Land, Kategorie, Werkerklärung und je Sprache Name,
-   Beschreibung und Vorschaubild.
-6. **Submit for Approval.** Die Prüfung dauert in der Regel 1 bis 5
-   Werktage. Bei Ablehnung steht der Grund dabei, danach `Edit` und erneut
-   einreichen. Nach Freigabe laufen Änderungen über `Update`.
+1. Sign in at [console.zepp.com](https://console.zepp.com/) with the Zepp
+   account.
+2. **Create an app** and get a real `appId` from it. It is assigned
+   automatically during registration and has to be entered in `app.json`. The
+   `appId` in the package **must** match the one given at publishing time.
+3. `zeus build` produces the `.zab` package in `dist/`.
+4. In the console, upload the package under **Application Services →
+   Watchface**. The console works out the supported devices from the package
+   itself.
+5. Fill in: country, category, works declaration, and name, description and
+   preview image per language.
+6. **Submit for approval.** Review usually takes 1 to 5 working days. A
+   rejection comes with a reason; after that, `Edit` and submit again. Once
+   approved, changes go through `Update`.
 
-### Vorgaben ans Vorschaubild
+### Requirements for the preview image
 
-Für 480 × 480 verlangt die Spezifikation ein Vorschaubild von **324 × 324**.
-Der Build skaliert `icon.png` selbst darauf herunter.
+For 480 × 480 the specification asks for a preview image of **324 × 324**. The
+build scales `icon.png` down to that itself.
 
-Der Inhalt ist nicht frei wählbar, diese Beispielwerte sind vorgeschrieben:
+The content is not freely chosen; these sample values are prescribed:
 
-| Wert | Vorgabe | im Bild |
+| Value | Required | in the image |
 | --- | --- | --- |
-| Uhrzeit | 10:09:36 | ja |
-| Puls | 86 bpm | ja |
-| Schritte | 8670 | ja |
-| Akku | 75 % | ja |
-| Datum | Februar oder August | WED 12 AUG |
+| Time | 10:09:36 | yes |
+| Heart rate | 86 bpm | yes |
+| Steps | 8670 | yes |
+| Battery | 75 % | yes |
+| Date | February or August | WED 12 AUG |
 
-Erzeugt mit `design/shots/active.html?icon=1&preview=1`. Ohne `preview=1`
-zeigt dieselbe Seite die Alltagswerte für die README-Screenshots.
+Generated with `design/shots/active.html?icon=1&preview=1`. Without `preview=1`
+the same page shows the everyday values for the README screenshots.
 
-### Offen vor dem Einreichen
+### Open before submitting
 
-* **`appId` ist noch die Nummer aus der Vorlage** (20972) und in beiden
-  Projekten dieselbe. Ohne eigene, unterschiedliche IDs aus der Konsole
-  überschreiben sich Grün und Rot gegenseitig auf der Uhr, und die Einreichung
-  scheitert an der Prüfung „appId muss übereinstimmen".
-* **`vender` steht auf `zepp`**, ebenfalls aus der Vorlage. Dort gehört der
-  eigene Entwicklername hin.
-* **Namensrechte klären.** Name und Optik zitieren eine bekannte Filmreihe.
-  Das ist eine Frage an die Prüfung, nicht an den Code.
+* **`appId` is still the number from the template** (20972) and identical in
+  both projects. Without separate IDs of their own from the console, green and
+  red overwrite each other on the watch, and submission fails the "appId must
+  match" check.
+* **`vender` is set to `zepp`**, also from the template. That is where the
+  developer's own name belongs.
+* **Clear the naming rights.** Name and look quote a well-known film series.
+  That is a question for the review, not for the code.
 
-## Fehlersuche
+## Troubleshooting
 
-Jeder Aufbauschritt und jeder Callback meldet sich im Log, sichtbar in der
-Ausgabe von `zeus dev`:
+Every build step and every callback reports to the log, visible in the output of
+`zeus dev`:
 
 ```
 [matrix] sensors ok
@@ -394,8 +389,7 @@ Ausgabe von `zeus dev`:
 [matrix] clock ok
 ```
 
-Bricht etwas, steht statt `ok` ein `FAILED: <Fehler>` an genau der Stelle.
-Callbacks melden sich nur beim ersten Fehler, damit ein defekter Timer das Log
-nicht flutet. Bleibt der Bildschirm schwarz und es erscheint gar keine
-`[matrix]`-Zeile, wurde das Modul nicht geladen — dann liegt es am Manifest,
-nicht am Code.
+If something breaks, a `FAILED: <error>` appears instead of `ok` at exactly that
+spot. Callbacks only report their first failure so a broken timer does not flood
+the log. If the screen stays black and no `[matrix]` line shows up at all, the
+module was never loaded — in that case it is the manifest, not the code.

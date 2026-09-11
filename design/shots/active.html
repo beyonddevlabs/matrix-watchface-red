@@ -75,7 +75,7 @@ document.getElementById('rain').innerHTML = html;
 var strip = '';
 for (var q = 0; q < 20; q++) strip += (q % 10) + (q < 19 ? '\n' : '');
 
-// Die Klappkante gehoert zum Klapp-Effekt und wird nur mit ?flap gezeigt.
+// The flap edge belongs to the flap effect and is only shown with ?flap.
 var flap = location.search.indexOf('flap') >= 0;
 
 function cell(cls, stripCls, d, h, offset) {
@@ -111,8 +111,8 @@ function num(value, pad) {
   for (var i = 0; i < s.length; i++) out += cell('cellsm', 'stripsm', +s.charAt(i), 26);
   return '<span class="num">' + out + (pad || '') + '</span>';
 }
-// ?preview=1 schaltet auf die Werte, die die Zepp-OS-Spezifikation fuer das
-// Store-Vorschaubild vorschreibt: Akku 75 %, Datum im Februar oder August.
+// ?preview=1 switches to the values the Zepp OS specification prescribes for
+// the store preview image: battery 75 %, date in February or August.
 var storePreview = location.search.indexOf('preview') >= 0;
 var dateText = storePreview ? 'WED 12 AUG' : 'THU 10 SEP';
 var power = storePreview ? 75 : 87;
