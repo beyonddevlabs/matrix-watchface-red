@@ -1,110 +1,127 @@
 # Matrix Watchface Red
 
-**Der Matrix-Code auf deinem Handgelenk, in Rot.** Rote Zeichen regnen über einen
-schwarzen Grund, in der Mitte steht die Uhrzeit als Terminal-Ausdruck, darunter
-Datum, Schritte, Puls und Akkustand. Ein Cursor blinkt im Sekundentakt.
+Zifferblatt für die Amazfit T-Rex 3 Pro 48 mm (Zepp OS, 480 × 480 px, rund).
+Roter Matrix-Regen als Hintergrund, Uhrzeit und Sensorwerte in einem
+Terminal-Layout.
 
-Für die **Amazfit T-Rex 3 Pro 48mm**.
+Rote Variante von `matrix-watchface`. Unterschiede beschränken sich auf die
+Farbpalette in `watchface/index.js`, die rot gerenderten Regen-Frames sowie
+`appId` und `appName` in `app.json`.
 
-![Matrix Watchface](docs/screenshots/active.png)
+![Aktives Zifferblatt](docs/screenshots/active.png)
 
-## Was drin steckt
+## Funktionsumfang
 
-* **Fallende Katakana** über die ganze Fläche, 24 Einzelbilder, vier Sekunden
-  pro Schleife, nahtlos geschlossen
-* **Phosphor-CRT-Look** mit Scanlines, Nachleuchten und einem langsam
-  durchlaufenden Helligkeitsband
-* **Kantige Terminal-Schrift** (Chakra Petch), abgeschnittene Ecken statt
-  Rundungen
-* **Uhrzeit exakt in der Bildmitte**, Sekunden kleiner rechts daneben, dahinter
-  der blinkende Cursor
-* **Datum, Schritte, Puls und Akkustand** als Terminal-Zeilen, alle Werte
-  bündig untereinander
-* **Sparsame Always-On-Anzeige**: schwarzer Grund, gedimmte Ziffern an genau
-  derselben Stelle wie im aktiven Zustand, kein Regen, keine Animation
+- **Regen-Hintergrund** aus 24 vorgerenderten PNG-Frames (480 × 480) mit 6 fps,
+  Schleifenlänge 4 s, nahtlos geschlossen
+- **Uhrzeit** zentriert in 80 px, Sekunden rechts daneben in 28 px, Cursor
+  blinkt im Sekundentakt
+- **Datenzeilen** für Datum, Schritte, Puls und Akkustand, Label- und
+  Wertespalte auf festen X-Positionen
+- **AOD** auf eigener Widget-Ebene (`show_level.ONAL_AOD`): gedimmte Farben,
+  nur Uhrzeit, Datum und Schritte, keine Animation
+- **Chakra Petch Medium** als Schriftart, wird mit dem Paket ausgeliefert
 
-**Die Always-On-Anzeige, nur Uhrzeit, Datum und Schritte**
+![Always-On-Display](docs/screenshots/aod.png)
 
-![Always-On-Anzeige](docs/screenshots/aod.png)
+## Aktualisierung
 
-## Klapp-Ziffern, vorbereitet aber ausgeschaltet
+Ein Widget wird nur beschrieben, wenn sich sein Wert geändert hat.
 
-Gedacht ist der Ziffernwechsel als Fallblattanzeige: von 9 auf 2 rollt die
-Ziffer vorwärts über 0 und 1 durch. Der Effekt ist vollständig gebaut, die
-Bildfolgen liegen im Projekt, ein Ziffernschritt dauert 300 Millisekunden.
+| Auslöser | Aktualisiert |
+| --- | --- |
+| `Time.onPerMinute()` | Stunde, Minute, Datum, Akku, AOD-Ebene |
+| `Step.onChange()`, `HeartRate.onLastChange()` | Schritte, Puls – gepuffert, geschrieben höchstens 1× pro Sekunde |
+| `setInterval(1000)` | Sekunden und Cursor, nur bei eingeschaltetem Display |
 
-**Aktuell ist er ausgeschaltet.** Im Alltag wechseln die Ziffern direkt. Der
-Effekt lief auf echter Hardware noch nicht sauber und wartet auf einen weiteren
-Anlauf. Wer ihn ausprobieren will, setzt in `watchface/index.js` die Zeile
-`const USE_FLAP = false` auf `true`.
+## Voraussetzungen
 
-So sähe er aus, hier mitten im Rollen festgehalten:
+- Amazfit T-Rex 3 Pro 48 mm, in der Zepp App gekoppelt
+- [Node.js](https://nodejs.org/) ab Version 14
+- Zepp-Konto und aktivierter Developer Mode in der Zepp App
+  (Profil → gekoppeltes Gerät → ganz nach unten scrollen)
 
-![Ziffer im Klappvorgang](docs/screenshots/flap.png)
+## Installation
 
-## Auf die Uhr bringen
-
-Das Watchface liegt nicht im Zepp-Store, es wird über den Entwicklermodus
-installiert. Das dauert einmalig etwa fünf Minuten.
-
-**Was du brauchst**
-
-* eine Amazfit T-Rex 3 Pro 48mm, mit der Zepp App gekoppelt
-* [Node.js](https://nodejs.org/) ab Version 14 auf dem Rechner
-* ein Zepp-Konto, dasselbe wie in der App
-
-**1. Zeus CLI installieren**
+Das Watchface liegt nicht im Zepp-Store und wird über den Entwicklermodus
+installiert.
 
 ```bash
 npm install -g @zeppos/zeus-cli
 zeus login
-```
-
-**2. Entwicklermodus in der Zepp App einschalten**
-
-Profil, dann bei den gekoppelten Geräten ganz nach unten scrollen, dort
-**Developer Mode** aktivieren.
-
-**3. Projekt holen und auf die Uhr schicken**
-
-```bash
-git clone https://github.com/<dein-account>/matrix-watchface-red.git
+git clone https://github.com/<account>/matrix-watchface-red.git
 cd matrix-watchface-red
 zeus preview
 ```
 
-`zeus preview` baut das Paket und zeigt einen QR-Code im Terminal. Den mit der
-Scan-Funktion im Developer Mode der Zepp App abfotografieren, dann wird das
-Watchface direkt auf die Uhr installiert.
+`zeus preview` baut das Paket und gibt einen QR-Code im Terminal aus. Diesen mit
+der Scan-Funktion im Developer Mode der Zepp App einlesen; das Watchface wird
+auf die Uhr übertragen und erscheint dort in der Zifferblattauswahl.
 
-Danach liegt es auf der Uhr unter den Zifferblättern und lässt sich wie jedes
-andere auswählen.
+`zeus build` erzeugt stattdessen ein `.zab`-Paket unter `dist/`.
 
-Alternativ legt `zeus build` ein `.zab`-Paket in `dist/` ab.
+Grüne und rote Variante haben unterschiedliche `appId`s und lassen sich parallel
+auf derselben Uhr installieren.
+
+## Konfiguration
+
+Feature-Flags am Anfang von `watchface/index.js`:
+
+| Flag | Standard | Wirkung |
+| --- | --- | --- |
+| `USE_RAIN` | `true` | Regen-Animation aus `image/rain/` |
+| `USE_FLAP` | `false` | Fallblatt-Animation beim Ziffernwechsel |
+
+Die Fallblatt-Animation ist vollständig implementiert, die Frames liegen unter
+`image/flap/` (6 Frames für die großen Ziffern, je 4 für Sekunden und kleine
+Ziffern, 20 fps, also 300 ms pro Ziffernschritt). Ein Sprung von 9 auf 2 spielt
+9→0, 0→1 und 1→2 hintereinander ab. Auf echter Hardware läuft das noch nicht
+sauber, deshalb ist das Flag deaktiviert und die Ziffern wechseln direkt.
+
+![Ziffernwechsel mit Fallblatt-Animation](docs/screenshots/flap.png)
+
+## Farbpalette
+
+Definiert als `COLOR` in `watchface/index.js`:
+
+| Schlüssel | Wert | Verwendung |
+| --- | --- | --- |
+| `digit` | `0xffd9d9` | große Ziffern |
+| `second` | `0xbf2222` | Sekunden |
+| `label` | `0x731414` | Labels der Datenzeilen |
+| `value` | `0xf22b2b` | Werte der Datenzeilen |
+| `rule` | `0x4d0e0e` | Trennlinie |
+| `aodLabel` | `0x611111` | Labels im AOD |
+| `aodValue` | `0xb82020` | Werte im AOD |
+
+## Projektstruktur
+
+```
+app.json                    Manifest: Target, appId, Berechtigungen
+app.js                      App-Einstiegspunkt
+watchface/index.js          Layout, Widgets, Sensoranbindung
+assets/480x480-.../image/   rain (24), flap, digit
+assets/480x480-.../fonts/   Chakra Petch Medium + OFL.txt
+design/                     HTML-Artboards des Layout-Entwurfs
+docs/screenshots/           Screenshots für dieses README
+```
 
 ## Kompatibilität
 
-Gebaut und ausgelegt für die **T-Rex 3 Pro 48mm** mit 480 × 480 Pixeln, rund.
+Ausgelegt auf die T-Rex 3 Pro 48 mm mit 480 × 480 px. Weitere runde
+Zepp-OS-Geräte derselben Auflösung – etwa T-Rex 3 oder T-Rex Ultra 2 – lassen
+sich über einen zusätzlichen Eintrag unter `targets` in `app.json` ergänzen.
+Die 44-mm-Variante hat 466 × 466 px und braucht ein eigenes Layout.
 
-Andere runde Zepp-OS-Geräte mit derselben Auflösung, etwa T-Rex 3 oder T-Rex
-Ultra 2, brauchen nur einen zusätzlichen Eintrag in `app.json`. Die
-44-mm-Variante der T-Rex 3 Pro hat 466 × 466 Pixel und würde ein eigenes
-Layout brauchen.
+## Lizenz
 
-## Schrift
+Chakra Petch steht unter der SIL Open Font License. Die Lizenzdatei liegt als
+`OFL.txt` neben der Schriftdatei und muss mit ausgeliefert werden.
 
-Die Anzeige benutzt **Chakra Petch Medium**. Die Schriftdatei liegt unter
-`assets/480x480-amazfit-t-rex-3-pro/fonts/` und wird mit dem Watchface auf die
-Uhr gespielt. Sie steht unter der SIL Open Font License, die als `OFL.txt`
-danebenliegt und mitgeliefert werden muss.
+## Status
 
-## Stand
+Lauffähig. Offen sind die Fallblatt-Animation (siehe oben) und eine eigene
+`appId` aus der Zepp-Entwicklerkonsole, solange eine Store-Veröffentlichung
+geplant ist. Details in [DEVELOPMENT.md](DEVELOPMENT.md).
 
-Läuft. Der Regen ist drin, die Anzeige steht, die Always-On-Variante auch.
-
-Offen sind zwei Dinge: der Klapp-Effekt braucht noch einen Durchlauf auf echter
-Hardware, und für eine Veröffentlichung im Zepp-Store fehlt eine eigene `appId`
-aus der Entwicklerkonsole. Details dazu in
-[DEVELOPMENT.md](DEVELOPMENT.md).
-
-Es gibt das Ganze auch in Grün, siehe `matrix-watchface`.
+Grüne Variante: `matrix-watchface`.
